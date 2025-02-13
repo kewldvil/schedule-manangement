@@ -1,31 +1,21 @@
 package com.moi.noc.schedule.controller;
 
-import com.moi.noc.schedule.services.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/schedule")
+@RequestMapping("/api/v1/schedules")
 @RequiredArgsConstructor
 @Slf4j
 public class ScheduleController {
-    public ResponseEntity<?> createSchedule() {
-        return null;
+    @GetMapping
+    public String test() {
+        return "Presidium API is working!";
     }
 
-    public ResponseEntity<?> getSchedule() {
-        return null;
-    }
-
-    public ResponseEntity<?> updateSchedule() {
-        return null;
-    }
-
-    public ResponseEntity<?> deleteSchedule() {
-        return null;
-    }
 
 }

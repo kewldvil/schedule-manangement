@@ -27,7 +27,8 @@ public class Schedule {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
-    private String presidium;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Presidium presidium;
     @OneToOne(cascade = CascadeType.ALL)
     private Uniform uniform;
     @OneToOne(cascade = CascadeType.ALL)
