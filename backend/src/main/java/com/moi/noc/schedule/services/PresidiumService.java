@@ -37,8 +37,6 @@ public class PresidiumService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Presidium not found"));
 
         presidium.setName(presidiumDetails.getName());
-        presidium.setName(presidiumDetails.getName());
-
         return presidiumRepository.save(presidium);
     }
 

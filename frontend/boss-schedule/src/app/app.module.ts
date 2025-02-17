@@ -12,6 +12,9 @@ import { CreateScheduleComponent } from './components/create-schedule/create-sch
 import { PresidiumComponent } from './components/presidium/presidium.component';
 import { UniformComponent } from './components/uniform/uniform.component';
 import { LocationComponent } from './components/location/location.component';
+import { LoadingComponent } from './components/loading/loading.component';
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {HttpClientModule} from "@angular/common/http";
 
 @NgModule({
   declarations: [
@@ -24,11 +27,15 @@ import { LocationComponent } from './components/location/location.component';
     CreateScheduleComponent,
     PresidiumComponent,
     UniformComponent,
-    LocationComponent
+    LocationComponent,
+    LoadingComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

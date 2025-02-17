@@ -17,10 +17,7 @@ import java.util.List;
 public class PresidiumController {
 
     private final PresidiumService presidiumService;
-    @GetMapping
-    public String test() {
-        return "Presidium API is working!";
-    }
+
     // Create a new Presidium
     @PostMapping
     public ResponseEntity<Presidium> createPresidium(@RequestBody Presidium presidium) {
@@ -29,13 +26,13 @@ public class PresidiumController {
         return new ResponseEntity<>(createdPresidium, HttpStatus.CREATED);
     }
 
-    // Get all Presidiums
-//    @GetMapping
-//    public ResponseEntity<List<Presidium>> getAllPresidiums() {
-//        log.info("Fetching all Presidiums");
-//        List<Presidium> presidiums = presidiumService.getAllPresidiums();
-//        return new ResponseEntity<>(presidiums, HttpStatus.OK);
-//    }
+    //     Get all Presidiums
+    @GetMapping("/")
+    public ResponseEntity<List<Presidium>> getAllPresidiums() {
+        log.info("Fetching all Presidiums");
+        List<Presidium> presidiums = presidiumService.getAllPresidiums();
+        return new ResponseEntity<>(presidiums, HttpStatus.OK);
+    }
 
     // Get a Presidium by ID
     @GetMapping("/{id}")
