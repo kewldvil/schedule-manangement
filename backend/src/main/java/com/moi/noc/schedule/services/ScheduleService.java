@@ -1,10 +1,21 @@
 package com.moi.noc.schedule.services;
 
+import com.moi.noc.schedule.dtos.ScheduleRequest;
+import com.moi.noc.schedule.dtos.ScheduleResponse;
+import com.moi.noc.schedule.enums.ScheduleStatus;
+import com.moi.noc.schedule.models.Location;
+import com.moi.noc.schedule.models.Presidium;
 import com.moi.noc.schedule.models.Schedule;
+import com.moi.noc.schedule.models.Uniform;
+import com.moi.noc.schedule.repositories.LocationRepo;
+import com.moi.noc.schedule.repositories.PresidiumRepo;
 import com.moi.noc.schedule.repositories.ScheduleRepo;
+import com.moi.noc.schedule.repositories.UniformRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -12,20 +23,80 @@ import java.util.List;
 public class ScheduleService {
 
     private final ScheduleRepo scheduleRepo;
+    private final PresidiumRepo presidiumRepository;
+    private final UniformRepo uniformRepository;
+    private final LocationRepo locationRepository;
 
-    public void createSchedule(Schedule schedule) {
-        scheduleRepo.save(schedule); // Save the schedule to the database
+    public Schedule createSchedule(ScheduleRequest scheduleRequest) {
+        // Fetch related entities from the database
+        Presidium presidium = presidiumRepository.findById(scheduleRequest.getPresidium())
+                .orElseThrow(() -> new RuntimeException("Presidium not found"));
+        Uniform uniform = uniformRepository.findById(scheduleRequest.getUniform())
+                .orElseThrow(() -> new RuntimeException("Uniform not found"));
+        Location location = locationRepository.findById(scheduleRequest.getLocation())
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+
+        // Create and populate the Schedule entity
+        Schedule schedule = new Schedule();
+        schedule.setDate(LocalDate.parse(scheduleRequest.getDate()));
+        schedule.setStartTime(LocalTime.parse(scheduleRequest.getStartTime()));
+        schedule.setDescription(scheduleRequest.getDescription());
+        schedule.setPresidium(presidium);
+        schedule.setUniform(uniform);
+        schedule.setLocation(location);
+        schedule.setStatus(ScheduleStatus.valueOf(scheduleRequest.getStatus()));
+
+        // Save the Schedule entity to the database
+        return scheduleRepo.save(schedule);
     }
 
-    public List<Schedule> getSchedule() {
-        return scheduleRepo.findAll(); // Retrieve all schedules from the database
+    // Retrieve all schedules
+    public List<ScheduleResponse> getSchedules() {
+        return scheduleRepo.findAll().stream()
+                .map(schedule -> {
+                    ScheduleResponse scheduleResponse = new ScheduleResponse();
+                    scheduleResponse.setId(schedule.getId());
+                    scheduleResponse.setDate(LocalDate.parse(schedule.getDate().toString()));
+                    scheduleResponse.setStartTime(LocalTime.parse(schedule.getStartTime().toString()));
+                    scheduleResponse.setDescription(schedule.getDescription());
+                    scheduleResponse.setPresidium(schedule.getPresidium().getName());
+                    scheduleResponse.setUniform(schedule.getUniform().getName());
+                    scheduleResponse.setLocation(schedule.getLocation().getName());
+                    scheduleResponse.setStatus(schedule.getStatus().name());
+                    return scheduleResponse;
+                })
+                .toList();
     }
 
-    public void updateSchedule(Schedule schedule) {
-        scheduleRepo.save(schedule); // Update the schedule in the database
+    // Update an existing schedule
+    public void updateSchedule(Long id, ScheduleRequest scheduleRequest) {
+        // Find the existing schedule
+        Schedule schedule = scheduleRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Schedule not found"));
+
+        // Fetch related entities from the database
+        var presidium = presidiumRepository.findById(scheduleRequest.getPresidium())
+                .orElseThrow(() -> new RuntimeException("Presidium not found"));
+        var uniform = uniformRepository.findById(scheduleRequest.getUniform())
+                .orElseThrow(() -> new RuntimeException("Uniform not found"));
+        var location = locationRepository.findById(scheduleRequest.getLocation())
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+
+        // Update the Schedule entity
+        schedule.setDate(LocalDate.parse(scheduleRequest.getDate()));
+        schedule.setStartTime(LocalTime.parse(scheduleRequest.getStartTime()));
+        schedule.setDescription(scheduleRequest.getDescription());
+        schedule.setPresidium(presidium);
+        schedule.setUniform(uniform);
+        schedule.setLocation(location);
+        schedule.setStatus(ScheduleStatus.valueOf(scheduleRequest.getStatus()));
+
+        // Save the updated Schedule entity
+        scheduleRepo.save(schedule);
     }
 
+    // Delete a schedule by ID
     public void deleteSchedule(Long id) {
-        scheduleRepo.deleteById(id); // Delete the schedule by ID
+        scheduleRepo.deleteById(id);
     }
 }

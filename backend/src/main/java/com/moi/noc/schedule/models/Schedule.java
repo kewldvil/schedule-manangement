@@ -1,5 +1,6 @@
 package com.moi.noc.schedule.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.moi.noc.schedule.enums.ScheduleStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Setter
 @Getter
+
 public class Schedule {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
@@ -27,11 +29,17 @@ public class Schedule {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "presidium_id", referencedColumnName = "id")
     private Presidium presidium;
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "uniform_id", referencedColumnName = "id")
     private Uniform uniform;
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id", referencedColumnName = "id")
     private Location location;
     @Enumerated(EnumType.STRING)
     private ScheduleStatus status;
