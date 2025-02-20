@@ -27,7 +27,7 @@ public class PresidiumController {
     }
 
     //     Get all Presidiums
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<Presidium>> getAllPresidiums() {
         log.info("Fetching all Presidiums");
         List<Presidium> presidiums = presidiumService.getAllPresidiums();

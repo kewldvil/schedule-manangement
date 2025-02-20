@@ -26,7 +26,7 @@ public class LocationController {
     }
 
     //     Get all Locations
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<Location>> getAllLocations() {
         log.info("Fetching all Locations");
         List<Location> locations = locationService.getAllLocations();

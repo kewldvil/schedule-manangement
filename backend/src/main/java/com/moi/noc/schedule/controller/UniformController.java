@@ -26,7 +26,7 @@ public class UniformController {
     }
 
     //     Get all Uniforms
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<Uniform>> getAllUniforms() {
         log.info("Fetching all Uniforms");
         List<Uniform> uniforms = uniformService.getAllUniforms();

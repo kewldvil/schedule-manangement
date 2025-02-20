@@ -19,7 +19,6 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Setter
 @Getter
-
 public class Schedule {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)

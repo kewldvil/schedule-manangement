@@ -1,1 +1,32 @@
-<p>schedule-back works!</p>
+<!-- Begin page -->
+<div class="wrapper">
+  <!--  @@include('./partials/left-sidebar.html')-->
+  <app-sidebar/>
+  <!-- ============================================================== -->
+  <!-- Start Page Content here -->
+  <!-- ============================================================== -->
+
+  <div class="content-page">
+    <div class="content">
+      <app-navbar/>
+
+      <!-- Start Content-->
+      <div class="container-fluid">
+        <router-outlet></router-outlet>
+      </div>
+      <!-- container -->
+
+    </div>
+    <!-- content -->
+
+    <app-footer/>
+
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- End Page content -->
+  <!-- ============================================================== -->
+
+
+</div>
+<!-- END wrapper -->
