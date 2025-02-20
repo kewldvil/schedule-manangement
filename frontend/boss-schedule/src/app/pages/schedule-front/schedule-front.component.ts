@@ -3,6 +3,7 @@ import moment from "moment";
 import 'moment/locale/km';
 import {ScheduleService} from "../../services/schedule.service";
 import {Subject, takeUntil} from "rxjs";
+import {WebsocketService} from "../../services/websocket.service";
 moment.locale("km")
 @Component({
   selector: 'app-schedule-front',
@@ -16,7 +17,7 @@ export class ScheduleFrontComponent implements OnInit,OnDestroy{
   isLoading: boolean | undefined;
   schedules:any;
   private destroy$ = new Subject<void>();
-  constructor(private scheduleService:ScheduleService) {
+  constructor(private scheduleService:ScheduleService,private webSocketService:WebsocketService) {
   }
   ngOnDestroy(): void {
     // Clear the interval when the component is destroyed to avoid memory leaks
@@ -37,6 +38,11 @@ export class ScheduleFrontComponent implements OnInit,OnDestroy{
     // Update the time every second
     this.intervalId = setInterval(() => this.updateTime(), 1000);
     this.listAllSchedule();
+    this.webSocketService.getScheduleUpdates().subscribe((schedule) => {
+      console.log("Received schedule update:", schedule);
+      this.listAllSchedule();
+    });
+
   }
   private updateTime(): void {
     const now = new Date();
