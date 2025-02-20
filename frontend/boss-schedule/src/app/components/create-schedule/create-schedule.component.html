@@ -1,4 +1,3 @@
-
 <div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
   <div class="row">
     <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
@@ -11,6 +10,36 @@
               </h4>
             </div>
             <div class="mb-3">
+              <label class="form-label">កាលបរិច្ឆេទ</label>
+              <input type="date" class="form-control" formControlName="date" [min]="currentDate" #scheduleInput
+                     [ngClass]="{ 'is-invalid': submitted && f['date'].errors}"/>
+              @if (submitted && f['date'].errors?.['required']) {
+                <div class="invalid-feedback mt-1">
+                  <div>សូមបញ្ចូលកាលបរិច្ឆេទ</div>
+                </div>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label">ម៉ោង</label>
+              <input type="time" class="form-control" formControlName="startTime"
+                     [ngClass]="{ 'is-invalid': submitted && f['startTime'].errors}"/>
+              @if (submitted && f['startTime'].errors?.['required']) {
+                <div class="invalid-feedback mt-1">
+                  <div>សូមបញ្ចូលម៉ោង</div>
+                </div>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label">កម្មវិធី</label>
+              <textarea class="form-control" formControlName="description" style="min-height: 150px"
+                        [ngClass]="{ 'is-invalid': submitted && f['description'].errors}"></textarea>
+              @if (submitted && f['description'].errors?.['required']) {
+                <div class="invalid-feedback mt-1">
+                  <div>សូមបញ្ចូលកម្មវិធី</div>
+                </div>
+              }
+            </div>
+            <div class="mb-3">
               <label class="form-label">អធិបតីភាព</label>
               <select class="form-select form-select-sm mb-0" formControlName="presidium"
                       [ngClass]="{ 'is-invalid': submitted && f['presidium'].errors}">
@@ -21,6 +50,34 @@
               @if (submitted && f['presidium'].errors?.['required']) {
                 <div class="invalid-feedback mt-1">
                   <div>សូមជ្រើសរើសអធិបតីភាព</div>
+                </div>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label">ឯកសណ្ឋាន</label>
+              <select class="form-select form-select-sm mb-0" formControlName="uniform"
+                      [ngClass]="{ 'is-invalid': submitted && f['uniform'].errors}">
+
+                <option selected value="">...ជ្រើសរើស...</option>
+                <option value="{{p.id}}" *ngFor="let p of uniforms;let i=index">{{ p.name }}</option>
+              </select>
+              @if (submitted && f['uniform'].errors?.['required']) {
+                <div class="invalid-feedback mt-1">
+                  <div>សូមជ្រើសរើសឯកសណ្ឋាន</div>
+                </div>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label">ទីតាំង</label>
+              <select class="form-select form-select-sm mb-0" formControlName="location"
+                      [ngClass]="{ 'is-invalid': submitted && f['location'].errors}">
+
+                <option selected value="">...ជ្រើសរើស...</option>
+                <option value="{{p.id}}" *ngFor="let p of locations;let i=index">{{ p.name }}</option>
+              </select>
+              @if (submitted && f['location'].errors?.['required']) {
+                <div class="invalid-feedback mt-1">
+                  <div>សូមជ្រើសរើសទីតាំង</div>
                 </div>
               }
             </div>
@@ -45,30 +102,46 @@
           <table class="table table-striped table-centered mb-0">
             <thead>
             <tr>
-              <th>ល.រ</th>
-              <th>ខ្មែរ</th>
-              <th>Latin</th>
-              <th>ស្រុក/ខណ្ឌ</th>
-              <th>ខេត្ត/ក្រុង</th>
+              <th>កាលបរិច្ឆេទ</th>
+              <th>ម៉ោង</th>
+              <th>កម្មវិធី</th>
+              <th>ក្រោមអធិបតីភាព</th>
+              <th>ឯកសណ្ឋាន</th>
+              <th>ទីតាំង</th>
+              <th>ស្ថានភាព</th>
               <th>ផ្សេងៗ</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-<!--            <tr *ngFor="let c of communes; let i = index">-->
-<!--              <td>{{ i + 1 }}</td>-->
-<!--              <td>{{ c.commune_name_kh }}</td>-->
-<!--              <td>{{ c.commune_name_en }}</td>-->
-<!--              <td>{{ selectedDistrict?.district_name_kh }}</td>-->
-<!--              <td>{{ selectedProvince?.province_city_name_kh }}</td>-->
-<!--              <td class="table-action">-->
-<!--                <a href="javascript:void(0);" class="action-icon" (click)="onEditClick(c.id)">-->
-<!--                  <i class="mdi mdi-pencil"></i>-->
-<!--                </a>-->
-<!--                <a href="javascript:void(0);" class="action-icon" (click)="deleteCommune(c.id)">-->
-<!--                  <i class="mdi mdi-delete"></i>-->
-<!--                </a>-->
-<!--              </td>-->
+            <tr *ngFor="let s of schedules; let i = index">
+              <td>{{ convertToKhmerDate(s.date) }}</td>
+              <td>{{ convertToKhmerTime(s.startTime) }}</td>
+              <td>{{ s.description }}</td>
+              <td>{{ s.presidium }}</td>
+              <td>{{ s.uniform }}</td>
+              <td>{{ s.location }}</td>
+              <td>
+                  <span class="badge" [ngClass]="{
+                    'bg-warning': s.status === 'PENDING',
+                    'bg-success': s.status === 'COMPLETED',
+                    'bg-danger': s.status === 'CANCELLED',
+                    'text-white': s.status !== 'PENDING' && s.status !== 'COMPLETED'
+                  }">
+                    {{ s.status }}
+                  </span>
+              </td>
+
+              <td class="table-action">
+                <a href="javascript:void(0);" class="action-icon" (click)="onEditClick(s.id)" *ngIf="s.status!=='COMPLETED'">
+                  <i class="mdi mdi-pencil"></i>
+                </a>
+                <a href="javascript:void(0);" class="action-icon" (click)="delete(s.id)">
+                  <i class="mdi mdi-delete"></i>
+                </a>
+                <a href="javascript:void(0);" class="action-icon" (click)="updateStatus(s)" *ngIf="s.status!=='COMPLETED'">
+                  <i [ngClass]="s.status==='PENDING'?'mdi mdi-alarm-off':'mdi mdi-alarm-check'"></i>
+                </a>
+              </td>
             </tr>
             </tbody>
           </table>

@@ -11,6 +11,7 @@ import com.moi.noc.schedule.repositories.LocationRepo;
 import com.moi.noc.schedule.repositories.PresidiumRepo;
 import com.moi.noc.schedule.repositories.ScheduleRepo;
 import com.moi.noc.schedule.repositories.UniformRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -98,5 +99,15 @@ public class ScheduleService {
     // Delete a schedule by ID
     public void deleteSchedule(Long id) {
         scheduleRepo.deleteById(id);
+    }
+    @Transactional
+    public void updateScheduleStatus() {
+        LocalDate today = LocalDate.now();
+        List<Schedule> schedules = scheduleRepo.findByDateBeforeAndStatus(today, ScheduleStatus.valueOf("PENDING"));
+
+        for (Schedule schedule : schedules) {
+            schedule.setStatus(ScheduleStatus.valueOf("COMPLETED"));
+            scheduleRepo.save(schedule);
+        }
     }
 }

@@ -1,1 +1,42 @@
-<p>schedule-front works!</p>
+<div class="container-fluid " >
+  <div class="header pt-1 d-flex justify-content-between" style="font-family:'Noto Sans Khmer',serif">
+    <div id="left" class="d-flex">
+      <div class="image m-2">
+        <img src="dtm.ico" width="100px" height="auto" alt="logo">
+      </div>
+      <div class="title pt-1">
+        <h2 class="text-white">នាយកដ្ឋានហេដ្ឋារចនាសម័្ពន្ធបច្ចេកវិទ្យាគមនាគមន៏ និងព័ត៌មាន</h2>
+        <h1 class="text-white">តារាងកម្មវិធី លោកឧត្តមសេនីយ៍ត្រី ប្រធាននាយកដ្ឋាន</h1>
+      </div>
+    </div>
+    <div>
+      <h2 class="text-white">{{ currentDate }}</h2>
+      <h1 class="text-white text-lg-end">{{ currentTime }}</h1>
+    </div>
+  </div>
+  <table class="table table-centered mb-0 text-white" width="100%">
+    <thead>
+    <tr class="text-center font-18" >
+      <th>កាលបរិច្ឆេទ</th>
+      <th>ម៉ោង</th>
+      <th>កម្មវិធី</th>
+      <th>ក្រោមអធិបតីភាព</th>
+      <th>ឯកសណ្ឋាន</th>
+      <th>ទីតាំង</th>
+    </tr>
+    </thead>
+    <tbody class="font-18">
+    <tr *ngFor="let s of schedules; let i = index" class="text-center font-18">
+      <td >
+        <div>{{ convertToKhmerDate(s.date)[0]}}</div>
+        <div>{{ convertToKhmerDate(s.date)[1]}}</div>
+      </td>
+      <td style="color:#e0a428;font-weight: bold;font-size: 22px">{{ convertToKhmerTime(s.startTime) }}</td>
+      <td width="35%">{{ s.description }}</td>
+      <td style="font-family:'Khmer Muol';color:#e0a428">{{ s.presidium }}</td>
+      <td>{{ s.uniform }}</td>
+      <td>{{ s.location }}</td>
+    </tr>
+    </tbody>
+  </table>
+</div>

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/boss-schedule.iml" filepath="$PROJECT_DIR$/.idea/boss-schedule.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend/schedule.iml" filepath="$PROJECT_DIR$/backend/schedule.iml" />
     </modules>
   </component>
 </project>

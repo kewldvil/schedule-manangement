@@ -22,7 +22,6 @@ export class ScheduleService {
   updateSchedule(schedule: Schedule) {
     return this.http.put(environment.apiUrl + '/schedules/' + schedule.id, schedule);
   }
-
   deleteSchedule(schedule: Schedule) {
     return this.http.delete(environment.apiUrl + '/schedules/' + schedule.id);
   }

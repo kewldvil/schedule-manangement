@@ -4,6 +4,14 @@ import {Schedule} from "../../models/schedule";
 import {Subject, takeUntil} from "rxjs";
 import {ScheduleService} from "../../services/schedule.service";
 import {PresidiumService} from "../../services/presidium.service";
+import {UniformService} from "../../services/uniform.service";
+import {LocationService} from "../../services/location.service";
+import moment from "moment";
+import 'moment/locale/km';
+//@ts-ignore
+// import momentkh from "@thyrith/momentkh";
+// momentkh(moment);
+moment.locale("km")
 
 @Component({
   selector: 'app-create-schedule',
@@ -12,7 +20,8 @@ import {PresidiumService} from "../../services/presidium.service";
 })
 export class CreateScheduleComponent implements OnInit {
   @ViewChild('scheduleInput') scheduleInput!: ElementRef;
-
+  currentDate: string = '';
+  isUpdateStatus=false;
   scheduleForm: FormGroup;
   submitted = false;
   isLoading = false;
@@ -27,7 +36,9 @@ export class CreateScheduleComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private scheduleService: ScheduleService,
-    private presidiumService: PresidiumService
+    private presidiumService: PresidiumService,
+    private uniformService: UniformService,
+    private locationService: LocationService
   ) {
     this.scheduleForm = this.fb.group({
       date: ['', Validators.required],
@@ -40,8 +51,13 @@ export class CreateScheduleComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const today = new Date();
+    this.currentDate = today.toISOString().split('T')[0]; // Get the current date in yyyy-MM-dd format
+
     this.listAllSchedule();
     this.listAllPresidium();
+    this.listAllUniform();
+    this.listAllLocation()
   }
 
   get f(): { [key: string]: AbstractControl } {
@@ -54,7 +70,7 @@ export class CreateScheduleComponent implements OnInit {
 
     this.isLoading = true;
     const formValue = this.scheduleForm.value as Schedule;
-    console.log(formValue);
+    // console.log(formValue);
 
     if (this.isUpdateMode) {
       this.updateSchedule(formValue);
@@ -64,6 +80,7 @@ export class CreateScheduleComponent implements OnInit {
   }
 
   private createSchedule(schedule: Schedule): void {
+    schedule.status = 'PENDING'
     this.scheduleService.createSchedule(schedule).subscribe({
       next: () => {
         this.resetForm();
@@ -77,6 +94,16 @@ export class CreateScheduleComponent implements OnInit {
   private updateSchedule(schedule: Schedule): void {
     if (this.updateId != null) {
       schedule.id = this.updateId;
+      schedule.status="PENDING";
+      // If `isUpdateStatus` is true, toggle the status (or apply your logic here)
+      if (this.isUpdateStatus) {
+        // Example toggle: If status is 'ACTIVE' set to 'CANCELLED', and vice versa
+        if (schedule.status === 'PENDING') {
+          schedule.status = 'CANCELLED';
+        } else if (schedule.status === 'CANCELLED') {
+          schedule.status = 'PENDING';
+        }
+      }
     }
 
     this.scheduleService.updateSchedule(schedule).subscribe({
@@ -105,7 +132,7 @@ export class CreateScheduleComponent implements OnInit {
         // console.log(data)
         this.schedules = JSON.parse(data)
         // @ts-ignore
-        this.schedules=this.schedules.sort((a,b)=>b.sortOrder-a.sortOrder)
+        this.schedules = this.schedules.sort((a, b) => b.sortOrder - a.sortOrder)
         // this.schedules=this.schedules.map((schedule:any) =>schedule.schedule)
         // console.log(this.schedules)
       } catch (error) {
@@ -127,26 +154,51 @@ export class CreateScheduleComponent implements OnInit {
     this.scheduleForm.reset();
     this.submitted = false;
     setTimeout(() => this.scheduleInput.nativeElement.focus(), 0);
+    this.scheduleForm.get('presidium')?.setValue('');
+    this.scheduleForm.get('uniform')?.setValue('');
+    this.scheduleForm.get('location')?.setValue('');
   }
 
   onEditClick(id: any): void {
     this.isUpdateMode = true;
-    const schedules = this.schedules.find(schedule => schedule.id === id);
+    const schedule = this.schedules.find(schedule => schedule.id === id);
+    // console.log(schedule)
+    if (schedule) {
+      this.updateId = schedule.id;
 
-    if (schedules) {
-      this.updateId = schedules.id;
+      // Switch to English locale
+      // Temporarily set locale to English only for this operation
+      const currentLocale = moment.locale(); // Store the current locale
+      moment.locale('en'); // Change to English
+
+      // Ensure the date is in YYYY-MM-DD format (required by input[type="date"])
+      const formattedDate = moment(schedule.date, ["DD-MM-YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
+      const selectedPresidium = this.presidiums.find((item: { name: any; }) => item.name === schedule.presidium);
+      const selectedLocation = this.locations.find((item: { name: any; }) => item.name === schedule.location);
+      const selectedUniform = this.uniforms.find((item: { name: any; }) => item.name === schedule.uniform);
+
+
+      // Patch values into the form
       this.scheduleForm.patchValue({
-        date: schedules.date
+        date: formattedDate, // Correct format for input[type="date"]
+        startTime: schedule.startTime,
+        description: schedule.description,
+        presidium: selectedPresidium.id,
+        uniform: selectedUniform.id,
+        location: selectedLocation.id
+
       });
+      // Restore the original locale
+      moment.locale(currentLocale);
     } else {
-      this.handleError('Skill not found', new Error('Skill not found'));
+      this.handleError('Schedule not found', new Error('Schedule not found'));
     }
   }
+
 
   delete(id: any): void {
     this.isLoading = true;
     const schedule = this.schedules.find(gd => gd.id === id);
-
     if (schedule) {
       this.scheduleService.deleteSchedule(schedule).subscribe({
         next: () => {
@@ -154,11 +206,11 @@ export class CreateScheduleComponent implements OnInit {
           this.listAllSchedule();
           this.isUpdateMode = false;
         },
-        error: error => this.handleError('Failed to update schedule skill', error),
+        error: error => this.handleError('Failed to delete schedule ', error),
         complete: () => this.isLoading = false
       });
     } else {
-      this.handleError('Skill not found', new Error('Skill not found'));
+      this.handleError('Schedule not found', new Error('Schedule not found'));
     }
   }
 
@@ -172,11 +224,92 @@ export class CreateScheduleComponent implements OnInit {
     setTimeout(() => this.scheduleInput.nativeElement.focus(), 0);
     this.isUpdateMode = false;
   }
+
   private listAllPresidium(): void {
     this.presidiumService.listAllPresidiums().subscribe({
-      next: data => this.presidiums=data,
+      next: data => this.presidiums = data,
       error: error => this.handleError('Failed to fetch presidium', error)
     })
-
   }
+
+  private listAllUniform(): void {
+    this.uniformService.listAllUniforms().subscribe({
+      next: data => this.uniforms = data,
+      error: error => this.handleError('Failed to fetch uniform', error)
+    })
+  }
+
+  private listAllLocation(): void {
+    this.locationService.listAllLocations().subscribe({
+      next: data => this.locations = data,
+      error: error => this.handleError('Failed to fetch location', error)
+    })
+  }
+
+  convertToKhmerDate(date: string | undefined): string {
+    // Check if the date is valid
+    const parsedDate = moment(date, ["DD-MM-YYYY", "YYYY-MM-DD"], true);
+
+    // If the date is valid, format it; otherwise, return an empty string or a fallback message
+    if (parsedDate.isValid()) {
+      return "ថ្ងៃ" + parsedDate.format("dddd") +
+        " ទី" + parsedDate.format("DD") +
+        " ខែ" + parsedDate.format("MMMM") +
+        " ឆ្នាំ" + parsedDate.format("YYYY");
+    } else {
+      return "Invalid Date"; // Fallback message for invalid dates
+    }
+  }
+
+
+  convertToKhmerTime(time: string | undefined): string {
+    // Parse the time using the format HH:mm:ss
+    const parsedTime = moment(time, "HH:mm:ss", true);
+
+    // Check if the time is valid
+    if (parsedTime.isValid()) {
+      return parsedTime.format("hh:mm A"); // Format the time into 12-hour format with AM/PM
+    } else {
+      return "Invalid Time"; // Fallback message for invalid times
+    }
+  }
+
+
+  updateStatus(schedule: Schedule) {
+    if (schedule) {
+      // Toggle the update status
+      this.isUpdateStatus = !this.isUpdateStatus;
+
+      // Store the current locale and temporarily switch to 'en' for consistent formatting
+      const currentLocale = moment.locale(); // Store current locale
+      moment.locale('en'); // Switch to English locale temporarily
+
+      this.updateId = schedule.id;
+
+      // Find the selected items based on their name and assign their IDs
+      const selectedPresidium = this.presidiums.find((item: { name: any; }) => item.name === schedule.presidium);
+      const selectedLocation = this.locations.find((item: { name: any; }) => item.name === schedule.location);
+      const selectedUniform = this.uniforms.find((item: { name: any; }) => item.name === schedule.uniform);
+
+      // Ensure the selected items exist
+      if (selectedPresidium && selectedLocation && selectedUniform) {
+        schedule.presidium = selectedPresidium.id;
+        schedule.uniform = selectedUniform.id;
+        schedule.location = selectedLocation.id;
+
+        // Format the date into the proper format
+        schedule.date = moment(schedule.date, ["DD-MM-YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
+      }
+
+      // Restore the previous locale
+      moment.locale(currentLocale);
+
+      // Now update the schedule
+      this.updateSchedule(schedule);
+    } else {
+      this.handleError('Schedule not found', new Error('Schedule not found'));
+    }
+  }
+
+
 }
