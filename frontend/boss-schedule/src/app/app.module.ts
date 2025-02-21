@@ -16,6 +16,7 @@ import { LoadingComponent } from './components/loading/loading.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {NgOptimizedImage} from "@angular/common";
+import {NgxPaginationModule} from "ngx-pagination";
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import {NgOptimizedImage} from "@angular/common";
     ReactiveFormsModule,
     HttpClientModule,
     FormsModule,
-    NgOptimizedImage
+    NgOptimizedImage,
+    NgxPaginationModule
   ],
   providers: [],
   bootstrap: [AppComponent]

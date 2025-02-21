@@ -15,8 +15,8 @@ export class ScheduleService {
     return this.http.post(environment.apiUrl + '/schedules', schedule);
   }
 
-  listAllSchedules() {
-    return this.http.get<Schedule>(environment.apiUrl + '/schedules');
+  listAllSchedules(page:number,size:number) {
+    return this.http.get<Schedule>(environment.apiUrl + `/schedules?page=${page}&size=${size}`);
   }
 
   updateSchedule(schedule: Schedule) {

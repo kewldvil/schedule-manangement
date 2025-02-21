@@ -31,6 +31,10 @@ export class CreateScheduleComponent implements OnInit {
   presidiums: any;
   uniforms: any;
   locations: any;
+  totalRecords: number = 0;
+  currentPage: number = 1;
+  pageSize: number = 10; // Default page size
+  totalPages: number = 0;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -54,7 +58,7 @@ export class CreateScheduleComponent implements OnInit {
     const today = new Date();
     this.currentDate = today.toISOString().split('T')[0]; // Get the current date in yyyy-MM-dd format
 
-    this.listAllSchedule();
+    this.listAllSchedule(this.currentPage,this.pageSize);
     this.listAllPresidium();
     this.listAllUniform();
     this.listAllLocation()
@@ -84,7 +88,7 @@ export class CreateScheduleComponent implements OnInit {
     this.scheduleService.createSchedule(schedule).subscribe({
       next: () => {
         this.resetForm();
-        this.listAllSchedule();
+        this.listAllSchedule(this.currentPage,this.pageSize);
       },
       error: error => this.handleError('Failed to create schedule', error),
       complete: () => this.isLoading = false
@@ -109,7 +113,7 @@ export class CreateScheduleComponent implements OnInit {
     this.scheduleService.updateSchedule(schedule).subscribe({
       next: () => {
         this.resetForm();
-        this.listAllSchedule();
+        this.listAllSchedule(this.currentPage,this.pageSize);
         this.isUpdateMode = false;
       },
       error: error => this.handleError('Failed to update schedule', error),
@@ -117,8 +121,8 @@ export class CreateScheduleComponent implements OnInit {
     });
   }
 
-  private listAllSchedule(): void {
-    this.scheduleService.listAllSchedules()
+  private listAllSchedule(page:number,size:number): void {
+    this.scheduleService.listAllSchedules(page-1,size)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: data => this.handleListResponse(data),
@@ -127,9 +131,9 @@ export class CreateScheduleComponent implements OnInit {
   }
 
   private handleListResponse(data: any): void {
+
     if (typeof data === 'string') {
       try {
-        // console.log(data)
         this.schedules = JSON.parse(data)
         // @ts-ignore
         this.schedules = this.schedules.sort((a, b) => b.sortOrder - a.sortOrder)
@@ -139,9 +143,15 @@ export class CreateScheduleComponent implements OnInit {
         this.handleError('Error parsing JSON string', error);
       }
     } else if (Array.isArray(data)) {
+      // console.log(data)
       this.schedules = data;
     } else {
-      this.handleError('Unexpected data format', new Error('Invalid data format'));
+      this.schedules=data.schedules
+      this.totalRecords=data.totalItems;
+      this.totalPages=data.totalPages;
+      console.log(this.totalPages)
+      console.log(this.totalRecords)
+      // this.handleError('Unexpected data format', new Error('Invalid data format'));
     }
   }
 
@@ -203,7 +213,7 @@ export class CreateScheduleComponent implements OnInit {
       this.scheduleService.deleteSchedule(schedule).subscribe({
         next: () => {
           this.resetForm();
-          this.listAllSchedule();
+          this.listAllSchedule(this.currentPage,this.pageSize);
           this.isUpdateMode = false;
         },
         error: error => this.handleError('Failed to delete schedule ', error),
@@ -310,6 +320,38 @@ export class CreateScheduleComponent implements OnInit {
       this.handleError('Schedule not found', new Error('Schedule not found'));
     }
   }
+  onPageChange(pageNumber: number) {
+    this.currentPage = pageNumber;
+    this.listAllSchedule(this.currentPage,this.pageSize);
+  }
+// Method to get the starting record number
+  getStartRecord(): number {
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
 
+// Method to get the ending record number
+  getEndRecord(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalRecords);
+  }
+  latinToKhmer(number: any, totalDigits: number = 2): string {
+    const khmerNumbers = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
 
+    if (number == null || isNaN(number)) {
+      return '';
+    }
+
+    // Convert the number to a string and pad it with leading zeros
+    let numberStr = number.toString().padStart(totalDigits, '0');
+
+    // Check if the input number is zero
+    if (parseInt(numberStr) === 0) {
+      return '';
+    }
+
+    // Convert each digit to Khmer numeral
+    return numberStr.split('').map((digit: string) => {
+      const khmerDigit = khmerNumbers[parseInt(digit)];
+      return khmerDigit !== undefined ? khmerDigit : '';
+    }).join('');
+  }
 }

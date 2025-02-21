@@ -13,7 +13,10 @@ import com.moi.noc.schedule.repositories.ScheduleRepo;
 import com.moi.noc.schedule.repositories.UniformRepo;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -52,8 +55,31 @@ public class ScheduleService {
     }
 
     // Retrieve all schedules
-    public List<ScheduleResponse> getSchedules() {
-        return scheduleRepo.findAll().stream()
+// Retrieve all schedules
+//    @Transactional
+//    public Page<ScheduleResponse> getSchedules(Pageable pageable) {
+//        return scheduleRepo.findAllOrderByPendingStatusFirst(pageable)
+//                .map(schedule -> {
+//                    ScheduleResponse scheduleResponse = new ScheduleResponse();
+//                    scheduleResponse.setId(schedule.getId());
+//                    scheduleResponse.setDate(schedule.getDate()); // No need to parse, assuming it's already LocalDate
+//                    scheduleResponse.setStartTime(schedule.getStartTime()); // No need to parse, assuming it's already LocalTime
+//                    scheduleResponse.setDescription(schedule.getDescription());
+//                    scheduleResponse.setPresidium(schedule.getPresidium().getName());
+//                    scheduleResponse.setUniform(schedule.getUniform().getName());
+//                    scheduleResponse.setLocation(schedule.getLocation().getName());
+//                    scheduleResponse.setStatus(schedule.getStatus().name());
+//                    return scheduleResponse;
+//                });
+//    }
+    @Transactional
+    public Page<Schedule> getSchedules(Pageable pageable){
+        return scheduleRepo.findAllOrderByPendingStatusFirst(pageable);
+    }
+
+    @Transactional
+    public List<ScheduleResponse> getPendingSchedules() {
+        return scheduleRepo.findByStatusOrderByDateAscStartTimeAsc(ScheduleStatus.PENDING).stream()
                 .map(schedule -> {
                     ScheduleResponse scheduleResponse = new ScheduleResponse();
                     scheduleResponse.setId(schedule.getId());

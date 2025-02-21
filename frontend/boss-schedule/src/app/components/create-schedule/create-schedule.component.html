@@ -143,11 +143,36 @@
                 </a>
               </td>
             </tr>
+            <tr *ngIf="schedules.length === 0">
+              <td colspan="8" class="text-center">មិនមានទិន្នន័យសម្រាប់បង្ហាញ</td>
+            </tr>
             </tbody>
           </table>
+
+        </div>
+        <div class="row pt-1">
+          <div class="col-lg-6 font-12">
+            <pagination-controls
+              class="custom-pagination"
+              (pageChange)="onPageChange($event)"
+              [autoHide]="true"
+              [responsive]="true"
+              previousLabel="ទំព័រមុន"
+              nextLabel="ទំព័របន្ទាប់">
+            </pagination-controls>
+          </div>
+          <div class="col-lg-6 text-end">
+            <!-- New record count display -->
+            <p class="mb-0 text-muted hidden-mobile font-12">
+              បង្ហាញទិន្នន័យពីទី {{ latinToKhmer(getStartRecord()) }}
+              ដល់ទី {{ latinToKhmer(getEndRecord()) }}
+              នៃទិន្នន័យសរុប {{ latinToKhmer(totalRecords) }}
+            </p>
+          </div>
         </div>
         <!-- end table-responsive -->
       </div>
+
       <!-- end card -->
     </div>
     <!-- end col -->

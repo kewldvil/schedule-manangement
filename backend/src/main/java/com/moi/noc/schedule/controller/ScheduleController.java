@@ -9,12 +9,18 @@ import com.moi.noc.schedule.utilities.ScheduleTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/schedules")
@@ -35,9 +41,44 @@ public class ScheduleController {
 
     // Retrieve all schedules
     @GetMapping
-    public ResponseEntity<List<ScheduleResponse>> getSchedules() {
+    public ResponseEntity<Map<String, Object>> getSchedules(@RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
         log.info("Fetching all schedules");
-        List<ScheduleResponse> schedules = scheduleService.getSchedules();
+        Page<Schedule> schedules = scheduleService.getSchedules(pageable);
+
+        // Map users to DTOs
+        List<ScheduleResponse> scheduleResponse =
+                schedules.map(
+                        schedule -> {
+                            ScheduleResponse sr = new ScheduleResponse();
+                            sr.setId(schedule.getId());
+                            sr.setDate(schedule.getDate()); // No need to parse, assuming it's already LocalDate
+                            sr.setStartTime(schedule.getStartTime()); // No need to parse, assuming it's already LocalTime
+                            sr.setDescription(schedule.getDescription());
+                            sr.setPresidium(schedule.getPresidium().getName());
+                            sr.setUniform(schedule.getUniform().getName());
+                            sr.setLocation(schedule.getLocation().getName());
+                            sr.setStatus(schedule.getStatus().name());
+                            return sr;
+                        }
+                ).toList();
+
+        // Prepare response with pagination details
+        Map<String, Object> response = new HashMap<>();
+        response.put("schedules", scheduleResponse);
+        response.put("currentPage", schedules.getNumber());
+        response.put("totalItems", schedules.getTotalElements());
+        response.put("totalPages", schedules.getTotalPages());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Retrieve all pending schedules
+    @GetMapping("/pending")
+    public ResponseEntity<List<ScheduleResponse>> getPendingSchedules() {
+        log.info("Fetching all pending schedules");
+        List<ScheduleResponse> schedules = scheduleService.getPendingSchedules();
         return ResponseEntity.ok(schedules);
     }
 
