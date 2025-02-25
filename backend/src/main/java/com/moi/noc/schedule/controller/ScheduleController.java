@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 public class ScheduleController {
     private final ScheduleService scheduleService;
     private final SimpMessagingTemplate messagingTemplate; // Inject WebSocket Messaging Template
+    private final ScheduleTask scheduleTask;
 
     @PostMapping
     public ResponseEntity<Schedule> createSchedule(@RequestBody ScheduleRequest scheduleRequest) {
@@ -102,5 +103,20 @@ public class ScheduleController {
         messagingTemplate.convertAndSend("/topic/schedules", "Deleted schedule with ID: " + id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    @GetMapping("/trigger")
+    public ResponseEntity<String> triggerScheduleUpdate() {
+        log.info("Triggering update of all PENDING schedules to COMPLETED");
 
+        try {
+            scheduleTask.updateSchedules(); // Call the void method
+            log.info("Successfully triggered schedule update");
+
+            return ResponseEntity.ok()
+                    .body("Schedule update triggered successfully");
+        } catch (Exception e) {
+            log.error("Failed to update schedules", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to update schedules: " + e.getMessage());
+        }
+    }
 }

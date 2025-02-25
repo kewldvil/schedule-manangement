@@ -7,20 +7,23 @@ import {WebSocketService} from "../../services/websocket.service";
 import {FrontScheduleService} from "../../services/front-schedule.service";
 
 moment.locale("km")
+
 @Component({
   selector: 'app-schedule-front',
   templateUrl: './schedule-front.component.html',
   styleUrl: './schedule-front.component.css'
 })
-export class ScheduleFrontComponent implements OnInit,OnDestroy{
-  currentTime:string='';
-  currentDate='';
+export class ScheduleFrontComponent implements OnInit, OnDestroy {
+  currentTime: string = '';
+  currentDate = '';
   intervalId: any;
   isLoading: boolean | undefined;
-  schedules:any;
+  schedules: any;
   private destroy$ = new Subject<void>();
-  constructor(private frontScheduleService:FrontScheduleService,private webSocketService:WebSocketService) {
+
+  constructor(private frontScheduleService: FrontScheduleService, private webSocketService: WebSocketService) {
   }
+
   ngOnDestroy(): void {
     // Clear the interval when the component is destroyed to avoid memory leaks
     if (this.intervalId) {
@@ -32,24 +35,27 @@ export class ScheduleFrontComponent implements OnInit,OnDestroy{
 
   ngOnInit(): void {
     this.updateTime();
-    const parsedDate=moment()
-    this.currentDate="ថ្ងៃ" + parsedDate.format("dddd") +
+    const parsedDate = moment()
+    this.currentDate = "ថ្ងៃ" + parsedDate.format("dddd") +
       " ទី" + parsedDate.format("DD") +
       " ខែ" + parsedDate.format("MMMM") +
       " ឆ្នាំ" + parsedDate.format("YYYY");
     // Update the time every second
     this.intervalId = setInterval(() => this.updateTime(), 1000);
-    this.listAllSchedule();
+    this.updatePendingToComplete();
+    // this.listAllSchedule();
     this.webSocketService.getScheduleUpdates().subscribe((schedule) => {
       console.log("Received schedule update:", schedule);
       this.listAllSchedule();
     });
 
   }
+
   private updateTime(): void {
     const now = new Date();
-    this.currentTime =moment().format("HH:mm:ss")// Format the time as needed
+    this.currentTime = moment().format("HH:mm:ss")// Format the time as needed
   }
+
   private listAllSchedule(): void {
     this.frontScheduleService.listAllPendingSchedules()
       .pipe(takeUntil(this.destroy$))
@@ -68,13 +74,16 @@ export class ScheduleFrontComponent implements OnInit,OnDestroy{
         this.schedules = this.schedules.sort((a, b) => b.sortOrder - a.sortOrder)
         // this.schedules=this.schedules.map((schedule:any) =>schedule.schedule)
         // console.log(this.schedules)
+        this.isLoading = false;
       } catch (error) {
         this.handleError('Error parsing JSON string', error);
       }
     } else if (Array.isArray(data)) {
       this.schedules = data;
+      this.isLoading = false;
     } else {
       this.handleError('Unexpected data format', new Error('Invalid data format'));
+      this.isLoading = false;
     }
   }
 
@@ -82,6 +91,7 @@ export class ScheduleFrontComponent implements OnInit,OnDestroy{
     console.error(message, error);
     this.isLoading = false;
   }
+
   convertToKhmerDate(date: string | undefined) {
     // Check if the date is valid
     const parsedDate = moment(date, ["DD-MM-YYYY", "YYYY-MM-DD"], true);
@@ -110,4 +120,15 @@ export class ScheduleFrontComponent implements OnInit,OnDestroy{
     }
   }
 
+  private updatePendingToComplete(): void {
+    this.isLoading = true;
+    this.frontScheduleService.updatePendingToComplete()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: data => {
+          this.listAllSchedule()
+        },
+        error: error => this.listAllSchedule()
+      });
+  }
 }

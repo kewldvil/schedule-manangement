@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Client, Message } from '@stomp/stompjs';
 import SockJS from 'sockjs-client'; // ✅ Import SockJS
 import { Subject } from 'rxjs';
+import {environment} from "../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
@@ -16,10 +17,10 @@ export class WebSocketService {
 
   private connect() {
     this.stompClient = new Client({
-      brokerURL: 'ws://localhost:8080/ws',
+      brokerURL: environment.websocketUrl,
       reconnectDelay: 5000,
       debug: (str) => console.log(str),
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      webSocketFactory: () => new SockJS(environment.sockJsUrl),
       onConnect: () => {
         console.log("Connected to WebSocket");
 

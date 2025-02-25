@@ -11,8 +11,8 @@ public class BeanConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Allow all endpoints
-                        .allowedOrigins("http://localhost:4200") // Allow requests from Angular app
+                registry.addMapping("/api/**") // Allow all endpoints
+                        .allowedOrigins("http://localhost:81") // Allow requests from Angular app
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allowed HTTP methods
                         .allowedHeaders("*") // Allow all headers
                         .allowCredentials(true); // Allow cookies and credentials
