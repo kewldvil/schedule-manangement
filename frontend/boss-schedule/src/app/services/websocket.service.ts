@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Client, Message } from '@stomp/stompjs';
+import {Injectable} from '@angular/core';
+import {Client, Message} from '@stomp/stompjs';
 import SockJS from 'sockjs-client'; // ✅ Import SockJS
-import { Subject } from 'rxjs';
+import {Subject} from 'rxjs';
 import {environment} from "../../environments/environment";
 
 @Injectable({
@@ -16,11 +16,11 @@ export class WebSocketService {
   }
 
   private connect() {
+    // Initialize the STOMP client without brokerURL
     this.stompClient = new Client({
-      brokerURL: environment.websocketUrl,
-      reconnectDelay: 5000,
-      debug: (str) => console.log(str),
-      webSocketFactory: () => new SockJS(environment.sockJsUrl),
+      reconnectDelay: 5000, // Reconnect after 5 seconds if disconnected
+      debug: (str) => console.log(str), // Log STOMP debug messages
+      webSocketFactory: () => new SockJS(environment.sockJsUrl), // Use SockJS for WebSocket fallback
       onConnect: () => {
         console.log("Connected to WebSocket");
 
@@ -38,18 +38,28 @@ export class WebSocketService {
             this.handlePlainTextMessage(body);
           }
         });
+      },
+      onStompError: (frame) => {
+        console.error('STOMP protocol error:', frame.headers['message']);
+      },
+      onWebSocketError: (event) => {
+        console.error('WebSocket error:', event);
+      },
+      onDisconnect: () => {
+        console.log('WebSocket disconnected');
       }
     });
 
+    // Activate the STOMP client
     this.stompClient.activate();
   }
 
-// Handle newly created schedules (JSON)
+  // Handle newly created schedules (JSON)
   private handleScheduleCreate(schedule: any) {
-    this.scheduleUpdates.next({ type: 'create', data: schedule });
+    this.scheduleUpdates.next({type: 'create', data: schedule});
   }
 
-// Handle plain text messages (update or delete)
+  // Handle plain text messages (update or delete)
   private handlePlainTextMessage(message: string) {
     let match = message.match(/Updated schedule with ID: (\d+)/);
     if (match) {
@@ -67,17 +77,17 @@ export class WebSocketService {
     }
   }
 
-// Handle schedule updates
+  // Handle schedule updates
   private handleScheduleUpdate(id: number) {
-    this.scheduleUpdates.next({ type: 'update', id });
+    this.scheduleUpdates.next({type: 'update', id});
   }
 
-// Handle schedule deletions
+  // Handle schedule deletions
   private handleScheduleDelete(id: number) {
-    this.scheduleUpdates.next({ type: 'delete', id });
+    this.scheduleUpdates.next({type: 'delete', id});
   }
 
-
+  // Expose schedule updates as an observable
   getScheduleUpdates() {
     return this.scheduleUpdates.asObservable();
   }
