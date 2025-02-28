@@ -75,6 +75,11 @@ export class WebSocketService {
       console.log(`Schedule with ID ${id} was deleted`);
       this.handleScheduleDelete(id);
     }
+    // Handle general update messages
+    if (message.startsWith("Schedules updated at")) {
+      console.log('Schedules were updated:', message);
+      this.scheduleUpdates.next({type: 'update', message});
+    }
   }
 
   // Handle schedule updates
