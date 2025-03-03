@@ -32,10 +32,10 @@
         <div>{{ convertToKhmerDate(s.date)[1]}}</div>
       </td>
       <td style="color:#e0a428;font-weight: bold">{{ convertToKhmerTime(s.startTime) }}</td>
-      <td width="35%">{{ s.description }}</td>
-      <td style="font-family:'Khmer Muol';color:#e0a428">{{ s.presidium }}</td>
+      <td width="35%" [innerHTML]="s.description"></td>
+      <td style="font-family:'Khmer Muol'; color:#e0a428" [innerHTML]="s.presidium"></td>
       <td>{{ s.uniform }}</td>
-      <td>{{ s.location }}</td>
+      <td [innerHTML]="s.location"></td>
     </tr>
     </tbody>
   </table>

@@ -114,11 +114,16 @@ export class ScheduleFrontComponent implements OnInit, OnDestroy {
 
     // Check if the time is valid
     if (parsedTime.isValid()) {
-      return parsedTime.format("hh:mm A"); // Format the time into 12-hour format with AM/PM
+      let formattedTime = parsedTime.format("hh:mm A"); // Format the time into 12-hour format with AM/PM
+
+      // Replace AM/PM with Khmer equivalents
+      formattedTime = formattedTime.replace("ល្ងាច", "រសៀល")
+      return formattedTime;
     } else {
       return "Invalid Time"; // Fallback message for invalid times
     }
   }
+
 
   private updatePendingToComplete(): void {
     this.isLoading = true;
