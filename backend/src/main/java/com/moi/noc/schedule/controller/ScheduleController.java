@@ -79,7 +79,7 @@ public class ScheduleController {
     @GetMapping("/pending")
     public ResponseEntity<List<ScheduleResponse>> getPendingSchedules() {
         log.info("Fetching all pending schedules");
-        List<ScheduleResponse> schedules = scheduleService.getPendingSchedules();
+        List<ScheduleResponse> schedules = scheduleService.getPendingSchedulesForToday();
         return ResponseEntity.ok(schedules);
     }
 

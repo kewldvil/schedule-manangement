@@ -73,27 +73,30 @@ public class ScheduleService {
 //                });
 //    }
     @Transactional
-    public Page<Schedule> getSchedules(Pageable pageable){
+    public Page<Schedule> getSchedules(Pageable pageable) {
         return scheduleRepo.findAllOrderByPendingStatusFirst(pageable);
     }
 
     @Transactional
-    public List<ScheduleResponse> getPendingSchedules() {
-        return scheduleRepo.findByStatusOrderByDateAscStartTimeAsc(ScheduleStatus.PENDING).stream()
+    public List<ScheduleResponse> getPendingSchedulesForToday() {
+        LocalDate today = LocalDate.now();
+        return scheduleRepo.findByStatusAndDateOrderByDateAscStartTimeAsc(ScheduleStatus.PENDING, today)
+                .stream()
                 .map(schedule -> {
                     ScheduleResponse scheduleResponse = new ScheduleResponse();
                     scheduleResponse.setId(schedule.getId());
-                    scheduleResponse.setDate(LocalDate.parse(schedule.getDate().toString()));
-                    scheduleResponse.setStartTime(LocalTime.parse(schedule.getStartTime().toString()));
+                    scheduleResponse.setDate(schedule.getDate());
+                    scheduleResponse.setStartTime(schedule.getStartTime());
                     scheduleResponse.setDescription(schedule.getDescription());
-                    scheduleResponse.setPresidium(schedule.getPresidium().getName());
-                    scheduleResponse.setUniform(schedule.getUniform().getName());
-                    scheduleResponse.setLocation(schedule.getLocation().getName());
+                    scheduleResponse.setPresidium(schedule.getPresidium() != null ? schedule.getPresidium().getName() : null);
+                    scheduleResponse.setUniform(schedule.getUniform() != null ? schedule.getUniform().getName() : null);
+                    scheduleResponse.setLocation(schedule.getLocation() != null ? schedule.getLocation().getName() : null);
                     scheduleResponse.setStatus(schedule.getStatus().name());
                     return scheduleResponse;
                 })
                 .toList();
     }
+
 
     // Update an existing schedule
     public void updateSchedule(Long id, ScheduleRequest scheduleRequest) {
@@ -126,6 +129,7 @@ public class ScheduleService {
     public void deleteSchedule(Long id) {
         scheduleRepo.deleteById(id);
     }
+
     @Transactional
     public void updateScheduleStatus() {
         LocalDate today = LocalDate.now();

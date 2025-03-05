@@ -14,7 +14,8 @@ import java.util.List;
 @Repository
 public interface  ScheduleRepo extends JpaRepository<Schedule, Long> {
     List<Schedule> findByDateBeforeAndStatus(LocalDate date, ScheduleStatus status);
-    List<Schedule> findByStatusOrderByDateAscStartTimeAsc(ScheduleStatus status);
+    List<Schedule> findByStatusAndDateOrderByDateAscStartTimeAsc(ScheduleStatus status, LocalDate date);
+
     @Query("SELECT s FROM Schedule s ORDER BY " +
             "CASE WHEN s.status = 'PENDING' THEN 1 ELSE 2 END, " +
             "s.date ASC, s.startTime ASC")
