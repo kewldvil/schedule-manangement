@@ -116,10 +116,10 @@
             <tr *ngFor="let s of schedules; let i = index">
               <td>{{ convertToKhmerDate(s.date) }}</td>
               <td>{{ convertToKhmerTime(s.startTime) }}</td>
-              <td>{{ s.description }}</td>
-              <td>{{ s.presidium }}</td>
-              <td>{{ s.uniform }}</td>
-              <td>{{ s.location }}</td>
+              <td [innerHTML]="s.description"></td>
+              <td [innerHTML]="s.presidium"></td>
+              <td [innerHTML]="s.uniform"></td>
+              <td [innerHTML]="s.location"></td>
               <td>
                   <span class="badge" [ngClass]="{
                     'bg-warning': s.status === 'PENDING',
