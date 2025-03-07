@@ -61,13 +61,17 @@ export class WebSocketService {
 
   // Handle plain text messages (update or delete)
   private handlePlainTextMessage(message: string) {
-    let match = message.match(/Updated schedule with ID: (\d+)/);
+    const items = ['schedule', 'presidium', 'location', 'uniform'];
+    let match = message.match(new RegExp(`Updated (${items.join('|')}) with ID: (\\d+)`));
+
     if (match) {
-      const id = parseInt(match[1], 10);
-      console.log(`Schedule with ID ${id} was updated`);
+      const item = match[1]; // Get the matched item
+      const id = parseInt(match[2], 10);
+      console.log(`${item} with ID ${id} was updated`);
       this.handleScheduleUpdate(id);
       return;
     }
+
 
     match = message.match(/Deleted schedule with ID: (\d+)/);
     if (match) {

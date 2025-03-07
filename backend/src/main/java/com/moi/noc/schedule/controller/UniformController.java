@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 @Slf4j
 public class UniformController {
     private final UniformService uniformService;
-
+    private final SimpMessagingTemplate messagingTemplate; // Inject WebSocket Messaging Template
     // Create a new Uniform
     @PostMapping
     public ResponseEntity<Uniform> createUniform(@RequestBody Uniform uniform) {
@@ -46,6 +47,7 @@ public class UniformController {
     public ResponseEntity<Uniform> updateUniform(@PathVariable Long id, @RequestBody Uniform uniformDetails) {
         log.info("Updating Uniform with ID: {}", id);
         Uniform updatedUniform = uniformService.updateUniform(id, uniformDetails);
+        messagingTemplate.convertAndSend("/topic/schedules", "Updated uniform with ID: " + id);
         return new ResponseEntity<>(updatedUniform, HttpStatus.OK);
     }
 

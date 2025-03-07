@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 @Slf4j
 public class LocationController {
     private final LocationService locationService;
-
+    private final SimpMessagingTemplate messagingTemplate; // Inject WebSocket Messaging Template
     // Create a new Location
     @PostMapping
     public ResponseEntity<Location> createLocation(@RequestBody Location location) {
@@ -46,6 +47,7 @@ public class LocationController {
     public ResponseEntity<Location> updateLocation(@PathVariable Long id, @RequestBody Location locationDetails) {
         log.info("Updating Location with ID: {}", id);
         Location updatedLocation = locationService.updateLocation(id, locationDetails);
+        messagingTemplate.convertAndSend("/topic/schedules", "Updated location with ID: " + id);
         return new ResponseEntity<>(updatedLocation, HttpStatus.OK);
     }
 
