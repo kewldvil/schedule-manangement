@@ -42,13 +42,16 @@
         <td>{{ s.uniform }}</td>
         <td [innerHTML]="s.location"></td>
       </tr>
+      <tr *ngIf="todaySchedules.length == 0" class="text-center">
+        <td colspan="6">មិនមានទិន្នន័យ</td>
+      </tr>
       </tbody>
     </table>
   </fieldset>
 
   <!-- Upcoming Schedule Section -->
   <fieldset class="upcoming-schedule mt-4">
-    <legend>កាលវិភាគខាងមុខ</legend>
+    <legend>កាលវិភាគបន្ទាប់</legend>
     <table class="table table-centered mb-0 text-white" width="100%">
       <thead>
       <tr class="text-center font-22" style="color:yellow;font-family: 'Bokor',serif">
@@ -59,7 +62,7 @@
         <th>ឯកសណ្ឋាន</th>
         <th>ទីតាំង</th>
       </tr>
-      </thead>
+      </thead>/
       <tbody style="font-size: 25px">
       <tr *ngFor="let s of upcomingSchedules; let i = index" class="text-center">
         <td style="line-height: 2">
@@ -71,6 +74,9 @@
         <td style="font-family:'Khmer Muol'; color:#e0a428;width: 20%" [innerHTML]="s.presidium"></td>
         <td>{{ s.uniform }}</td>
         <td [innerHTML]="s.location"></td>
+      </tr>
+      <tr *ngIf="upcomingSchedules.length == 0" class="text-center">
+        <td colspan="6">មិនមានទិន្នន័យ</td>
       </tr>
       </tbody>
     </table>
