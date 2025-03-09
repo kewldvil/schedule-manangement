@@ -1,0 +1,33 @@
+fieldset {
+  border: 2px solid #e0a428;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+fieldset legend {
+  color: #e0a428;
+  font-family: 'Bokor', serif;
+  font-size: 24px;
+  padding: 0 10px;
+  width: auto;
+  float: none;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Ensure the table fits within the fieldset */
+.table {
+  margin-bottom: 0;
+  width: 100%;
+}
+
+/* Adjust fieldset spacing */
+.today-schedule,
+.upcoming-schedule {
+  margin-top: 20px;
+}
+.table tbody tr:last-child td {
+  border-bottom-width: 0;
+}

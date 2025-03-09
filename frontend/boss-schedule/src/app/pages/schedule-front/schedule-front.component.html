@@ -1,10 +1,11 @@
-<div class="container-fluid " style="zoom:80%;">
+<div class="container-fluid" style="zoom:80%;">
+  <!-- Header Section -->
   <div class="header pt-1 d-flex justify-content-between" style="font-family:'Noto Sans Khmer',serif">
     <div id="left" class="d-flex">
       <div class="image m-2">
         <img src="dtm.ico" width="100px" height="auto" alt="logo">
       </div>
-      <div class="title pt-1" >
+      <div class="title pt-1">
         <h1 class="text-white" style="font-family: 'Khmer Muol',serif">នាយកដ្ឋានហេដ្ឋារចនាសម័្ពន្ធបច្ចេកវិទ្យាគមនាគមន៏ និងព័ត៌មាន</h1>
         <h2 class="text-white" style="font-size: 35px;font-family: 'Bokor',serif;margin-top: 20px">តារាងកាលវិភាគ លោកឧត្តមសេនីយ៍ត្រី ប្រធាននាយកដ្ឋាន</h2>
       </div>
@@ -14,29 +15,64 @@
       <h1 class="text-white text-lg-end" style="margin-right: 40px;font-size: 3rem !important;">{{ currentTime }}</h1>
     </div>
   </div>
-  <table class="table table-centered mb-0 text-white" width="100%">
-    <thead>
-    <tr class="text-center font-22" style="color:yellow;font-family: 'Bokor',serif" >
-      <th>កាលបរិច្ឆេទ</th>
-      <th>ម៉ោង</th>
-      <th>កម្មវិធី</th>
-      <th>ក្រោមអធិបតីភាព</th>
-      <th>ឯកសណ្ឋាន</th>
-      <th>ទីតាំង</th>
-    </tr>
-    </thead>
-    <tbody style="font-size: 25px">
-    <tr *ngFor="let s of schedules; let i = index" class="text-center">
-      <td style="line-height: 2">
-        <div>{{ convertToKhmerDate(s.date)[0]}}</div>
-        <div>{{ convertToKhmerDate(s.date)[1]}}</div>
-      </td>
-      <td style="color:#e0a428;font-weight: bold">{{ convertToKhmerTime(s.startTime) }}</td>
-      <td width="35%" [innerHTML]="s.description"></td>
-      <td style="font-family:'Khmer Muol'; color:#e0a428;width: 20%" [innerHTML]="s.presidium"></td>
-      <td>{{ s.uniform }}</td>
-      <td [innerHTML]="s.location"></td>
-    </tr>
-    </tbody>
-  </table>
+
+  <!-- Today's Schedule Section -->
+  <fieldset class="today-schedule mt-4">
+    <legend>កាលវិភាគថ្ងៃនេះ</legend>
+    <table class="table table-centered mb-0 text-white" width="100%">
+      <thead>
+      <tr class="text-center font-22" style="color:yellow;font-family: 'Bokor',serif">
+        <th>កាលបរិច្ឆេទ</th>
+        <th>ម៉ោង</th>
+        <th>កម្មវិធី</th>
+        <th>ក្រោមអធិបតីភាព</th>
+        <th>ឯកសណ្ឋាន</th>
+        <th>ទីតាំង</th>
+      </tr>
+      </thead>
+      <tbody style="font-size: 25px">
+      <tr *ngFor="let s of todaySchedules; let i = index" class="text-center">
+        <td style="line-height: 2">
+          <div>{{ convertToKhmerDate(s.date)[0]}}</div>
+          <div>{{ convertToKhmerDate(s.date)[1]}}</div>
+        </td>
+        <td style="color:#e0a428;font-weight: bold">{{ convertToKhmerTime(s.startTime) }}</td>
+        <td width="35%" [innerHTML]="s.description"></td>
+        <td style="font-family:'Khmer Muol'; color:#e0a428;width: 20%" [innerHTML]="s.presidium"></td>
+        <td>{{ s.uniform }}</td>
+        <td [innerHTML]="s.location"></td>
+      </tr>
+      </tbody>
+    </table>
+  </fieldset>
+
+  <!-- Upcoming Schedule Section -->
+  <fieldset class="upcoming-schedule mt-4">
+    <legend>កាលវិភាគខាងមុខ</legend>
+    <table class="table table-centered mb-0 text-white" width="100%">
+      <thead>
+      <tr class="text-center font-22" style="color:yellow;font-family: 'Bokor',serif">
+        <th>កាលបរិច្ឆេទ</th>
+        <th>ម៉ោង</th>
+        <th>កម្មវិធី</th>
+        <th>ក្រោមអធិបតីភាព</th>
+        <th>ឯកសណ្ឋាន</th>
+        <th>ទីតាំង</th>
+      </tr>
+      </thead>
+      <tbody style="font-size: 25px">
+      <tr *ngFor="let s of upcomingSchedules; let i = index" class="text-center">
+        <td style="line-height: 2">
+          <div>{{ convertToKhmerDate(s.date)[0]}}</div>
+          <div>{{ convertToKhmerDate(s.date)[1]}}</div>
+        </td>
+        <td style="color:#e0a428;font-weight: bold">{{ convertToKhmerTime(s.startTime) }}</td>
+        <td width="35%" [innerHTML]="s.description"></td>
+        <td style="font-family:'Khmer Muol'; color:#e0a428;width: 20%" [innerHTML]="s.presidium"></td>
+        <td>{{ s.uniform }}</td>
+        <td [innerHTML]="s.location"></td>
+      </tr>
+      </tbody>
+    </table>
+  </fieldset>
 </div>

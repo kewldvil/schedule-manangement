@@ -79,8 +79,7 @@ public class ScheduleService {
 
     @Transactional
     public List<ScheduleResponse> getPendingSchedulesForToday() {
-        LocalDate today = LocalDate.now();
-        return scheduleRepo.findByStatusAndDateOrderByDateAscStartTimeAsc(ScheduleStatus.PENDING, today)
+        return scheduleRepo.findByStatusOrderByDateAscStartTimeAsc(ScheduleStatus.PENDING)
                 .stream()
                 .map(schedule -> {
                     ScheduleResponse scheduleResponse = new ScheduleResponse();

@@ -6,6 +6,16 @@ import {Subject, takeUntil} from "rxjs";
 import {WebSocketService} from "../../services/websocket.service";
 import {FrontScheduleService} from "../../services/front-schedule.service";
 
+// Assuming Schedule interface looks something like this
+interface Schedule {
+  date: string;
+  startTime: string;
+  description: string;
+  presidium: string;
+  uniform: string;
+  location: string;
+}
+
 moment.locale("km")
 
 @Component({
@@ -19,6 +29,8 @@ export class ScheduleFrontComponent implements OnInit, OnDestroy {
   intervalId: any;
   isLoading: boolean | undefined;
   schedules: any;
+  todaySchedules: Schedule[] = [];
+  upcomingSchedules: Schedule[] = [];
   private destroy$ = new Subject<void>();
 
   constructor(private frontScheduleService: FrontScheduleService, private webSocketService: WebSocketService) {
@@ -80,6 +92,7 @@ export class ScheduleFrontComponent implements OnInit, OnDestroy {
       }
     } else if (Array.isArray(data)) {
       this.schedules = data;
+      this.splitSchedules(this.schedules);
       this.isLoading = false;
     } else {
       this.handleError('Unexpected data format', new Error('Invalid data format'));
@@ -135,5 +148,18 @@ export class ScheduleFrontComponent implements OnInit, OnDestroy {
         },
         error: error => this.listAllSchedule()
       });
+  }
+
+// Logic to split schedules
+  private splitSchedules(allSchedules: any) {
+    moment.locale('en');
+    const today = moment().format('DD-MM-YYYY');
+    this.todaySchedules = allSchedules.filter((s: { date: string | number | Date; }) => {
+      return s.date === today;
+    });
+    this.upcomingSchedules = allSchedules.filter((s: { date: string | number | Date; }) => {
+      return s.date !== today;
+    });
+    moment.locale('km');
   }
 }
