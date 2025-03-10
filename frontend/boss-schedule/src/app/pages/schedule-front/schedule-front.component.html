@@ -20,7 +20,7 @@
   <fieldset class="today-schedule mt-4">
     <legend>កាលវិភាគថ្ងៃនេះ</legend>
     <table class="table table-centered mb-0 text-white" width="100%">
-      <thead>
+      <thead *ngIf="todaySchedules.length > 0">
       <tr class="text-center font-22" style="color:yellow;font-family: 'Bokor',serif">
         <th>កាលបរិច្ឆេទ</th>
         <th>ម៉ោង</th>
@@ -43,7 +43,7 @@
         <td [innerHTML]="s.location"></td>
       </tr>
       <tr *ngIf="todaySchedules.length == 0" class="text-center">
-        <td colspan="6">មិនមានទិន្នន័យ</td>
+        <td colspan="6" class="no-data">មិនមានទិន្នន័យ</td>
       </tr>
       </tbody>
     </table>
@@ -53,7 +53,7 @@
   <fieldset class="upcoming-schedule mt-4">
     <legend>កាលវិភាគបន្ទាប់</legend>
     <table class="table table-centered mb-0 text-white" width="100%">
-      <thead>
+      <thead *ngIf="upcomingSchedules.length > 0">
       <tr class="text-center font-22" style="color:yellow;font-family: 'Bokor',serif">
         <th>កាលបរិច្ឆេទ</th>
         <th>ម៉ោង</th>
@@ -62,7 +62,7 @@
         <th>ឯកសណ្ឋាន</th>
         <th>ទីតាំង</th>
       </tr>
-      </thead>/
+      </thead>
       <tbody style="font-size: 25px">
       <tr *ngFor="let s of upcomingSchedules; let i = index" class="text-center">
         <td style="line-height: 2">
@@ -76,7 +76,7 @@
         <td [innerHTML]="s.location"></td>
       </tr>
       <tr *ngIf="upcomingSchedules.length == 0" class="text-center">
-        <td colspan="6">មិនមានទិន្នន័យ</td>
+        <td colspan="6" class="no-data">មិនមានទិន្នន័យ</td>
       </tr>
       </tbody>
     </table>

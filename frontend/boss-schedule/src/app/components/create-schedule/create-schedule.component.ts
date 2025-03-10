@@ -289,39 +289,84 @@ export class CreateScheduleComponent implements OnInit {
   }
 
 
-  updateStatus(schedule: Schedule) {
-    if (schedule) {
-      // Toggle the update status
-      this.isUpdateStatus = !this.isUpdateStatus;
+  // updateStatus(schedule: Schedule) {
+  //   if (schedule) {
+  //     // Toggle the update status
+  //     this.isUpdateStatus = !this.isUpdateStatus;
+  //
+  //     // Store the current locale and temporarily switch to 'en' for consistent formatting
+  //     const currentLocale = moment.locale(); // Store current locale
+  //     moment.locale('en'); // Switch to English locale temporarily
+  //
+  //     this.updateId = schedule.id;
+  //
+  //     // Find the selected items based on their name and assign their IDs
+  //     const selectedPresidium = this.presidiums.find((item: { name: any; }) => item.name === schedule.presidium);
+  //     const selectedLocation = this.locations.find((item: { name: any; }) => item.name === schedule.location);
+  //     const selectedUniform = this.uniforms.find((item: { name: any; }) => item.name === schedule.uniform);
+  //
+  //     // Ensure the selected items exist
+  //     if (selectedPresidium && selectedLocation && selectedUniform) {
+  //       schedule.presidium = selectedPresidium.id;
+  //       schedule.uniform = selectedUniform.id;
+  //       schedule.location = selectedLocation.id;
+  //
+  //       // Format the date into the proper format
+  //       schedule.date = moment(schedule.date, ["DD-MM-YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
+  //     }
+  //
+  //     // Restore the previous locale
+  //     moment.locale(currentLocale);
+  //
+  //     // Now update the schedule
+  //     this.updateSchedule(schedule);
+  //   } else {
+  //     this.handleError('Schedule not found', new Error('Schedule not found'));
+  //   }
+  // }
+  updateStatus(schedule: Schedule): void {
+    if (!schedule) {
+      this.handleError('Schedule not found', new Error('Schedule not found'));
+      return;
+    }
+    // Store current locale and switch to English for consistent formatting
+    const currentLocale = moment.locale();
+    moment.locale('en');
+    // Toggle the update status
+    this.isUpdateStatus = !this.isUpdateStatus;
+    this.updateId = schedule.id;
 
-      // Store the current locale and temporarily switch to 'en' for consistent formatting
-      const currentLocale = moment.locale(); // Store current locale
-      moment.locale('en'); // Switch to English locale temporarily
+    try {
 
-      this.updateId = schedule.id;
 
-      // Find the selected items based on their name and assign their IDs
-      const selectedPresidium = this.presidiums.find((item: { name: any; }) => item.name === schedule.presidium);
-      const selectedLocation = this.locations.find((item: { name: any; }) => item.name === schedule.location);
-      const selectedUniform = this.uniforms.find((item: { name: any; }) => item.name === schedule.uniform);
+      // Find selected items and map to their IDs
+      const selectedPresidium = this.presidiums.find((item: { name: string | undefined; }) => item.name === schedule.presidium);
+      const selectedLocation = this.locations.find((item: { name: string | undefined; }) => item.name === schedule.location);
+      const selectedUniform = this.uniforms.find((item: { name: string | undefined; }) => item.name === schedule.uniform);
 
-      // Ensure the selected items exist
-      if (selectedPresidium && selectedLocation && selectedUniform) {
-        schedule.presidium = selectedPresidium.id;
-        schedule.uniform = selectedUniform.id;
-        schedule.location = selectedLocation.id;
-
-        // Format the date into the proper format
-        schedule.date = moment(schedule.date, ["DD-MM-YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
+      // Validate all required selections exist
+      if (!selectedPresidium || !selectedLocation || !selectedUniform) {
+        throw new Error('Invalid selection: Presidium, Location, or Uniform not found');
       }
 
-      // Restore the previous locale
+      // Create updated schedule object with proper IDs
+      const updatedSchedule = {
+        ...schedule,
+        presidium: selectedPresidium.id,
+        location: selectedLocation.id,
+        uniform: selectedUniform.id,
+        date: moment(schedule.date, ["DD-MM-YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD")
+      };
+
+      // Restore original locale
       moment.locale(currentLocale);
 
-      // Now update the schedule
-      this.updateSchedule(schedule);
-    } else {
-      this.handleError('Schedule not found', new Error('Schedule not found'));
+      // Update the schedule
+      this.updateSchedule(updatedSchedule);
+    } catch (error) {
+      // Restore locale in case of error
+      moment.locale(currentLocale);
+      this.handleError('Failed to update schedule', error);
     }
   }
   onPageChange(pageNumber: number) {
