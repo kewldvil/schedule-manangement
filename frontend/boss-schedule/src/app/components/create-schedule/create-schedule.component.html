@@ -93,11 +93,9 @@
       </div>
       <!-- end col -->
     </form>
-    <!-- end form col -->
 
     <div class="col-xxl-12 col-lg-12">
       <div class="card card-body">
-        <!-- Add a wrapper around the table for responsive scrolling -->
         <div class="table-responsive">
           <table class="table table-striped table-centered mb-0">
             <thead>
@@ -113,7 +111,8 @@
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let s of schedules; let i = index">
+            <!-- Apply paginate pipe here -->
+            <tr *ngFor="let s of schedules | paginate: { itemsPerPage: pageSize, currentPage: currentPage, totalItems: totalRecords }">
               <td>{{ convertToKhmerDate(s.date) }}</td>
               <td>{{ convertToKhmerTime(s.startTime) }}</td>
               <td [innerHTML]="s.description"></td>
@@ -130,7 +129,6 @@
                     {{ s.status }}
                   </span>
               </td>
-
               <td class="table-action">
                 <a href="javascript:void(0);" class="action-icon" (click)="onEditClick(s.id)" *ngIf="s.status!=='COMPLETED'">
                   <i class="mdi mdi-pencil"></i>
@@ -148,12 +146,11 @@
             </tr>
             </tbody>
           </table>
-
         </div>
         <div class="row pt-1">
           <div class="col-lg-6 font-12">
             <pagination-controls
-              class="custom-pagination"
+              class="custom-pagination" style="padding-left: 0"
               (pageChange)="onPageChange($event)"
               [autoHide]="true"
               [responsive]="true"
@@ -162,7 +159,6 @@
             </pagination-controls>
           </div>
           <div class="col-lg-6 text-end">
-            <!-- New record count display -->
             <p class="mb-0 text-muted hidden-mobile font-12">
               បង្ហាញទិន្នន័យពីទី {{ latinToKhmer(getStartRecord()) }}
               ដល់ទី {{ latinToKhmer(getEndRecord()) }}
@@ -170,12 +166,7 @@
             </p>
           </div>
         </div>
-        <!-- end table-responsive -->
       </div>
-
-      <!-- end card -->
     </div>
-    <!-- end col -->
   </div>
-  <!-- end row -->
 </div>

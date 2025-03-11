@@ -18,8 +18,10 @@ public interface  ScheduleRepo extends JpaRepository<Schedule, Long> {
     List<Schedule> findByStatusOrderByDateAscStartTimeAsc(ScheduleStatus status);
 
     @Query("SELECT s FROM Schedule s ORDER BY " +
-            "CASE WHEN s.status = 'PENDING' THEN 1 ELSE 2 END, " +
-            "s.date ASC, s.startTime ASC")
+            "CASE WHEN s.status = 'PENDING' THEN 0 ELSE 1 END, " +
+            "CASE WHEN s.status = 'PENDING' THEN s.date END ASC, " +
+            "CASE WHEN s.status != 'PENDING' THEN s.date END DESC, " +
+            "s.startTime ASC")
     Page<Schedule> findAllOrderByPendingStatusFirst(Pageable pageable);
 
 }

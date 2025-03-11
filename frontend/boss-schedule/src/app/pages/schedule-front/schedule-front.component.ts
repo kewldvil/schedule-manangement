@@ -154,11 +154,12 @@ export class ScheduleFrontComponent implements OnInit, OnDestroy {
   private splitSchedules(allSchedules: any) {
     moment.locale('en');
     const today = moment().format('DD-MM-YYYY');
+    const tomorrow = moment().add(1, 'days').format('DD-MM-YYYY');
     this.todaySchedules = allSchedules.filter((s: { date: string | number | Date; }) => {
       return s.date === today;
     });
     this.upcomingSchedules = allSchedules.filter((s: { date: string | number | Date; }) => {
-      return s.date !== today;
+      return s.date ===tomorrow;
     });
     moment.locale('km');
   }
