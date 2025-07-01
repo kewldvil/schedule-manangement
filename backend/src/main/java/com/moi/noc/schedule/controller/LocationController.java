@@ -1,6 +1,7 @@
 package com.moi.noc.schedule.controller;
 
 import com.moi.noc.schedule.models.Location;
+import com.moi.noc.schedule.models.Uniform;
 import com.moi.noc.schedule.services.LocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,5 +58,13 @@ public class LocationController {
         log.info("Deleting Location with ID: {}", id);
         locationService.deleteLocation(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // Soft Delete a Location
+    @PutMapping("/delete")
+    public ResponseEntity<Location> softDelete(@RequestBody Long id) {
+        log.info("Soft Deleting Location with ID: {}", id);
+        Location updatedLocation = locationService.softDeleteLocation(id);
+        return new ResponseEntity<>(updatedLocation, HttpStatus.OK);
     }
 }

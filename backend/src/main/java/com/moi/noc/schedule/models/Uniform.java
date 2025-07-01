@@ -18,4 +18,5 @@ public class Uniform {
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private boolean isActive=true;
 }

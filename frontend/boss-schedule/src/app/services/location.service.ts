@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Location} from "../interfaces/location";
 import {environment} from "../../environments/environment";
@@ -23,6 +23,6 @@ export class LocationService {
   }
 
   deleteLocation(location: Location) {
-    return this.http.delete(environment.apiUrl + '/locations/' + location.id);
+    return this.http.put(environment.apiUrl + '/locations/delete', location.id);
   }
 }

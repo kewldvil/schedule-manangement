@@ -23,6 +23,6 @@ export class PresidiumService {
   }
 
   deletePresidium(presidium: Presidium) {
-    return this.http.delete(environment.apiUrl + '/presidiums/' + presidium.id);
+    return this.http.put(environment.apiUrl + '/presidiums/delete' , presidium.id);
   }
 }

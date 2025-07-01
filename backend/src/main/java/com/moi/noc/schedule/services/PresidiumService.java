@@ -1,6 +1,7 @@
 package com.moi.noc.schedule.services;
 
 import com.moi.noc.schedule.models.Presidium;
+import com.moi.noc.schedule.models.Uniform;
 import com.moi.noc.schedule.repositories.PresidiumRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class PresidiumService {
 
     // Get all Presidiums
     public List<Presidium> getAllPresidiums() {
-        return presidiumRepository.findAll();
+        return presidiumRepository.findAllByIsActiveTrue();
     }
 
     // Get a Presidium by ID
@@ -46,5 +47,13 @@ public class PresidiumService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Presidium not found"));
 
         presidiumRepository.delete(presidium);
+    }
+    // Soft Delete Presidium
+    public Presidium softDeletePresidium(Long id) {
+        Presidium uniform = presidiumRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Presidium not found"));
+
+        uniform.setActive(false);
+        return presidiumRepository.save(uniform);
     }
 }

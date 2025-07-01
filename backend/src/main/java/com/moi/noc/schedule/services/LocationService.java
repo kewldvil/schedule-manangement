@@ -1,6 +1,7 @@
 package com.moi.noc.schedule.services;
 
 import com.moi.noc.schedule.models.Location;
+import com.moi.noc.schedule.models.Uniform;
 import com.moi.noc.schedule.repositories.LocationRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ public class LocationService {
 
     // Get all Locations
     public List<Location> getAllLocations() {
-        return locationRepository.findAll();
+        return locationRepository.findAllByIsActiveTrue();
     }
 
     // Get a Location by ID
@@ -45,5 +46,13 @@ public class LocationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found"));
 
         locationRepository.delete(location);
+    }
+    // Soft Delete Location
+    public Location softDeleteLocation(Long id) {
+        Location uniform = locationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Location not found"));
+
+        uniform.setActive(false);
+        return locationRepository.save(uniform);
     }
 }

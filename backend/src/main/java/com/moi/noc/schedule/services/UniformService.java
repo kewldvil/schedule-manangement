@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UniformService {
@@ -20,7 +21,7 @@ public class UniformService {
 
     // Get all Uniforms
     public List<Uniform> getAllUniforms() {
-        return uniformRepository.findAll();
+        return uniformRepository.findAllByIsActiveTrue();
     }
 
     // Get a Uniform by ID
@@ -45,5 +46,15 @@ public class UniformService {
 
         uniformRepository.delete(uniform);
     }
+
+    // Soft Delete Uniform
+    public Uniform softDeleteUniform(Long id) {
+        Uniform uniform = uniformRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Uniform not found"));
+
+        uniform.setActive(false);
+        return uniformRepository.save(uniform);
+    }
+
 }
 

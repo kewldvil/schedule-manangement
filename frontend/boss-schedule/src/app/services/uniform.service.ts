@@ -23,6 +23,6 @@ export class UniformService {
   }
 
   deleteUniform(uniform: Uniform) {
-    return this.http.delete(environment.apiUrl + '/uniforms/' + uniform.id);
+    return this.http.put(environment.apiUrl + '/uniforms/delete', uniform.id);
   }
 }

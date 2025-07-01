@@ -18,6 +18,7 @@ import java.util.List;
 public class UniformController {
     private final UniformService uniformService;
     private final SimpMessagingTemplate messagingTemplate; // Inject WebSocket Messaging Template
+
     // Create a new Uniform
     @PostMapping
     public ResponseEntity<Uniform> createUniform(@RequestBody Uniform uniform) {
@@ -57,5 +58,13 @@ public class UniformController {
         log.info("Deleting Uniform with ID: {}", id);
         uniformService.deleteUniform(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    // Soft Delete a Uniform
+    @PutMapping("/delete")
+    public ResponseEntity<Uniform> softDelete(@RequestBody Long id) {
+        log.info("Soft Deleting Uniform with ID: {}", id);
+        Uniform updatedUniform = uniformService.softDeleteUniform(id);
+        return new ResponseEntity<>(updatedUniform, HttpStatus.OK);
     }
 }

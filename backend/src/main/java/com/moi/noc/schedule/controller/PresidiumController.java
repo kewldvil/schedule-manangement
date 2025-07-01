@@ -1,5 +1,6 @@
 package com.moi.noc.schedule.controller;
 
+import com.moi.noc.schedule.models.Location;
 import com.moi.noc.schedule.models.Presidium;
 import com.moi.noc.schedule.services.PresidiumService;
 import lombok.RequiredArgsConstructor;
@@ -58,5 +59,12 @@ public class PresidiumController {
         log.info("Deleting Presidium with ID: {}", id);
         presidiumService.deletePresidium(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    // Soft Delete a Presidium
+    @PutMapping("/delete")
+    public ResponseEntity<Presidium> softDelete(@RequestBody Long id) {
+        log.info("Soft Deleting Presidium with ID: {}", id);
+        Presidium updatedPresidium = presidiumService.softDeletePresidium(id);
+        return new ResponseEntity<>(updatedPresidium, HttpStatus.OK);
     }
 }
