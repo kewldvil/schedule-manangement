@@ -25,4 +25,13 @@ export class ScheduleService {
   deleteSchedule(schedule: Schedule) {
     return this.http.delete(environment.apiUrl + '/schedules/' + schedule.id);
   }
+  zoomedIn(zoomLevel: number) {
+    return this.http.get<Schedule>(environment.apiUrl + `/schedules/zoom/in?zoomLevel=${zoomLevel}`);
+  }
+  zoomedOut(zoomLevel: number) {
+    return this.http.get<Schedule>(environment.apiUrl + `/schedules/zoom/out?zoomLevel=${zoomLevel}`);
+  }
+  resetZoom(){
+    return this.http.get<Schedule>(environment.apiUrl + `/schedules/zoom/reset`);
+  }
 }

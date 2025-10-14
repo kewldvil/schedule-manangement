@@ -21,7 +21,7 @@ moment.locale("km")
 export class CreateScheduleComponent implements OnInit {
   @ViewChild('scheduleInput') scheduleInput!: ElementRef;
   currentDate: string = '';
-  isUpdateStatus=false;
+  isUpdateStatus = false;
   scheduleForm: FormGroup;
   submitted = false;
   isLoading = false;
@@ -58,7 +58,7 @@ export class CreateScheduleComponent implements OnInit {
     const today = new Date();
     this.currentDate = today.toISOString().split('T')[0]; // Get the current date in yyyy-MM-dd format
 
-    this.listAllSchedule(this.currentPage,this.pageSize);
+    this.listAllSchedule(this.currentPage, this.pageSize);
     this.listAllPresidium();
     this.listAllUniform();
     this.listAllLocation()
@@ -88,7 +88,7 @@ export class CreateScheduleComponent implements OnInit {
     this.scheduleService.createSchedule(schedule).subscribe({
       next: () => {
         this.resetForm();
-        this.listAllSchedule(this.currentPage,this.pageSize);
+        this.listAllSchedule(this.currentPage, this.pageSize);
       },
       error: error => this.handleError('Failed to create schedule', error),
       complete: () => this.isLoading = false
@@ -98,7 +98,7 @@ export class CreateScheduleComponent implements OnInit {
   private updateSchedule(schedule: Schedule): void {
     if (this.updateId != null) {
       schedule.id = this.updateId;
-      schedule.status="PENDING";
+      schedule.status = "PENDING";
       // If `isUpdateStatus` is true, toggle the status (or apply your logic here)
       if (this.isUpdateStatus) {
         // Example toggle: If status is 'ACTIVE' set to 'CANCELLED', and vice versa
@@ -113,7 +113,7 @@ export class CreateScheduleComponent implements OnInit {
     this.scheduleService.updateSchedule(schedule).subscribe({
       next: () => {
         this.resetForm();
-        this.listAllSchedule(this.currentPage,this.pageSize);
+        this.listAllSchedule(this.currentPage, this.pageSize);
         this.isUpdateMode = false;
       },
       error: error => this.handleError('Failed to update schedule', error),
@@ -121,8 +121,8 @@ export class CreateScheduleComponent implements OnInit {
     });
   }
 
-  private listAllSchedule(page:number,size:number): void {
-    this.scheduleService.listAllSchedules(page-1,size)
+  private listAllSchedule(page: number, size: number): void {
+    this.scheduleService.listAllSchedules(page - 1, size)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: data => this.handleListResponse(data),
@@ -146,9 +146,9 @@ export class CreateScheduleComponent implements OnInit {
       // console.log(data)
       this.schedules = data;
     } else {
-      this.schedules=data.schedules
-      this.totalRecords=data.totalItems;
-      this.totalPages=data.totalPages;
+      this.schedules = data.schedules
+      this.totalRecords = data.totalItems;
+      this.totalPages = data.totalPages;
       console.log(this.totalPages)
       console.log(this.totalRecords)
       // this.handleError('Unexpected data format', new Error('Invalid data format'));
@@ -213,7 +213,7 @@ export class CreateScheduleComponent implements OnInit {
       this.scheduleService.deleteSchedule(schedule).subscribe({
         next: () => {
           this.resetForm();
-          this.listAllSchedule(this.currentPage,this.pageSize);
+          this.listAllSchedule(this.currentPage, this.pageSize);
           this.isUpdateMode = false;
         },
         error: error => this.handleError('Failed to delete schedule ', error),
@@ -340,9 +340,15 @@ export class CreateScheduleComponent implements OnInit {
 
 
       // Find selected items and map to their IDs
-      const selectedPresidium = this.presidiums.find((item: { name: string | undefined; }) => item.name === schedule.presidium);
-      const selectedLocation = this.locations.find((item: { name: string | undefined; }) => item.name === schedule.location);
-      const selectedUniform = this.uniforms.find((item: { name: string | undefined; }) => item.name === schedule.uniform);
+      const selectedPresidium = this.presidiums.find((item: {
+        name: string | undefined;
+      }) => item.name === schedule.presidium);
+      const selectedLocation = this.locations.find((item: {
+        name: string | undefined;
+      }) => item.name === schedule.location);
+      const selectedUniform = this.uniforms.find((item: {
+        name: string | undefined;
+      }) => item.name === schedule.uniform);
 
       // Validate all required selections exist
       if (!selectedPresidium || !selectedLocation || !selectedUniform) {
@@ -369,10 +375,12 @@ export class CreateScheduleComponent implements OnInit {
       this.handleError('Failed to update schedule', error);
     }
   }
+
   onPageChange(pageNumber: number) {
     this.currentPage = pageNumber;
-    this.listAllSchedule(this.currentPage,this.pageSize);
+    this.listAllSchedule(this.currentPage, this.pageSize);
   }
+
 // Method to get the starting record number
   getStartRecord(): number {
     return (this.currentPage - 1) * this.pageSize + 1;
@@ -382,6 +390,7 @@ export class CreateScheduleComponent implements OnInit {
   getEndRecord(): number {
     return Math.min(this.currentPage * this.pageSize, this.totalRecords);
   }
+
   latinToKhmer(number: any, totalDigits: number = 2): string {
     const khmerNumbers = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
 
@@ -403,4 +412,43 @@ export class CreateScheduleComponent implements OnInit {
       return khmerDigit !== undefined ? khmerDigit : '';
     }).join('');
   }
+
+  zoomLevel: number[] = [50, 75, 80, 90, 100, 110, 125, 150, 175, 200];
+  currentZoomIndex: number = 4; // index of 100%
+  zoomedIn() {
+    if (this.currentZoomIndex > 0) {
+      const newIndex = this.currentZoomIndex - 1;
+      const newZoom = this.zoomLevel[newIndex];
+      this.currentZoomIndex = newIndex;
+
+      this.scheduleService.zoomedIn(newZoom).subscribe({
+        next: (res) => console.log('Zoomed In →', newZoom, res),
+        error: (err) => console.error('Zoom In Error:', err)
+      });
+    }
+  }
+
+  zoomedOut() {
+    if (this.currentZoomIndex < this.zoomLevel.length - 1) {
+      const newIndex = this.currentZoomIndex + 1;
+      const newZoom = this.zoomLevel[newIndex];
+      this.currentZoomIndex = newIndex;
+
+      this.scheduleService.zoomedOut(newZoom).subscribe({
+        next: (res) => console.log('Zoomed Out →', newZoom, res),
+        error: (err) => console.error('Zoom Out Error:', err)
+      });
+    }
+  }
+
+
+  reset() {
+    this.currentZoomIndex = 4; // back to 100%
+    const resetZoom = this.zoomLevel[this.currentZoomIndex];
+    this.scheduleService.resetZoom().subscribe({
+      next: (res) => console.log('Reset Zoom →', resetZoom, res),
+      error: (err) => console.error('Reset Error:', err)
+    });
+  }
+
 }

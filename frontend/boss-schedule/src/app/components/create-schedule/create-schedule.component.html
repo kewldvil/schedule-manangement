@@ -82,10 +82,24 @@
               }
             </div>
 
-            <div class="mb-3">
-              <button class="btn btn-primary" type="submit">រក្សាទុក</button>
-              <button class="btn btn-danger m-1" type="button" (click)="cancelEdit()">បោះបង់</button>
+            <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <!-- Left button group -->
+              <div class="button-list d-flex gap-2">
+                <button class="btn btn-primary" type="submit">រក្សាទុក</button>
+                <button class="btn btn-danger" type="button" (click)="cancelEdit()">បោះបង់</button>
+              </div>
+
+              <!-- Right input spinner -->
+              <div class="button-list">
+                <div class="input-group">
+                  <button class="btn btn-primary" type="button" (click)="zoomedIn()">-</button>
+                  <input type="text" class="form-control text-center" [value]="zoomLevel[currentZoomIndex]" readonly style="max-height: 42px;max-width: 60px"/>
+                  <button class="btn btn-primary" type="button" (click)="zoomedOut()">+</button>
+                  <button class="btn btn-outline-warning rounded-pill mx-1" type="button" (click)="reset()">Reset</button>
+                </div>
+              </div>
             </div>
+
           </div>
           <!-- end card-body -->
         </div>
@@ -112,7 +126,8 @@
             </thead>
             <tbody>
             <!-- Apply paginate pipe here -->
-            <tr *ngFor="let s of schedules | paginate: { itemsPerPage: pageSize, currentPage: currentPage, totalItems: totalRecords }">
+            <tr
+              *ngFor="let s of schedules | paginate: { itemsPerPage: pageSize, currentPage: currentPage, totalItems: totalRecords }">
               <td>{{ convertToKhmerDate(s.date) }}</td>
               <td>{{ convertToKhmerTime(s.startTime) }}</td>
               <td [innerHTML]="s.description"></td>
@@ -130,13 +145,15 @@
                   </span>
               </td>
               <td class="table-action">
-                <a href="javascript:void(0);" class="action-icon" (click)="onEditClick(s.id)" *ngIf="s.status!=='COMPLETED'">
+                <a href="javascript:void(0);" class="action-icon" (click)="onEditClick(s.id)"
+                   *ngIf="s.status!=='COMPLETED'">
                   <i class="mdi mdi-pencil"></i>
                 </a>
                 <a href="javascript:void(0);" class="action-icon" (click)="delete(s.id)">
                   <i class="mdi mdi-delete"></i>
                 </a>
-                <a href="javascript:void(0);" class="action-icon" (click)="updateStatus(s)" *ngIf="s.status!=='COMPLETED'">
+                <a href="javascript:void(0);" class="action-icon" (click)="updateStatus(s)"
+                   *ngIf="s.status!=='COMPLETED'">
                   <i [ngClass]="s.status==='PENDING'?'mdi mdi-alarm-off':'mdi mdi-alarm-check'"></i>
                 </a>
               </td>
