@@ -31,6 +31,8 @@ public class ScheduleController {
     private final SimpMessagingTemplate messagingTemplate; // Inject WebSocket Messaging Template
     private final ScheduleTask scheduleTask;
 
+//    private static final int[] ZOOM_LEVELS = {50, 75, 80, 90, 100, 110, 125, 150, 175, 200};
+    private static final int DEFAULT_ZOOM = 100;
     @PostMapping
     public ResponseEntity<Schedule> createSchedule(@RequestBody ScheduleRequest scheduleRequest) {
         log.info("Creating a new Schedule: {}", scheduleRequest);
@@ -103,6 +105,7 @@ public class ScheduleController {
         messagingTemplate.convertAndSend("/topic/schedules", "Deleted schedule with ID: " + id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     @GetMapping("/trigger")
     public ResponseEntity<String> triggerScheduleUpdate() {
         log.info("Triggering update of all PENDING schedules to COMPLETED");
@@ -119,60 +122,46 @@ public class ScheduleController {
                     .body("Failed to update schedules: " + e.getMessage());
         }
     }
-    @GetMapping("/zoom")
-    public ResponseEntity<Map<String, Object>> getZoomedSchedules(@RequestParam int zoomLevel,
-                                                                  @RequestParam(defaultValue = "0") int page,
-                                                                  @RequestParam(defaultValue = "10") int size) {
-        log.info("Fetching schedules with zoomLevel: {}", zoomLevel);
-
-        // Example logic — modify page size based on zoom level
-        int adjustedSize = Math.max(1, (int) (size * (100.0 / zoomLevel)));
-        Pageable pageable = PageRequest.of(page, adjustedSize);
-
-        Page<Schedule> schedules = scheduleService.getSchedules(pageable);
-
-        List<ScheduleResponse> scheduleResponse = schedules.map(schedule -> {
-            ScheduleResponse sr = new ScheduleResponse();
-            sr.setId(schedule.getId());
-            sr.setDate(schedule.getDate());
-            sr.setStartTime(schedule.getStartTime());
-            sr.setDescription(schedule.getDescription());
-            sr.setPresidium(schedule.getPresidium().getName());
-            sr.setUniform(schedule.getUniform().getName());
-            sr.setLocation(schedule.getLocation().getName());
-            sr.setStatus(schedule.getStatus().name());
-            return sr;
-        }).toList();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("schedules", scheduleResponse);
-        response.put("zoomLevel", zoomLevel);
-        response.put("currentPage", schedules.getNumber());
-        response.put("totalItems", schedules.getTotalElements());
-        response.put("totalPages", schedules.getTotalPages());
-
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/zoom/in")
-    public ResponseEntity<Map<String, Object>> zoomIn(@RequestParam(defaultValue = "100") int zoomLevel) {
-        int newZoom = Math.min(zoomLevel + 10, 200);
-        log.info("Zooming in → {}%", newZoom);
-        return getZoomedSchedules(newZoom, 0, 10);
+    public ResponseEntity<Integer> zoomIn(@RequestParam(defaultValue = "100") int zoomLevel) {
+        log.info("Zooming in to {}%", zoomLevel);
+
+        Map<String, Object> zoomMessage = new HashMap<>();
+        zoomMessage.put("type", "zoomUpdate");
+        zoomMessage.put("action", "in");
+        zoomMessage.put("level", zoomLevel);
+
+        messagingTemplate.convertAndSend("/topic/schedules", zoomMessage);
+        return ResponseEntity.ok(zoomLevel);
     }
 
     @GetMapping("/zoom/out")
-    public ResponseEntity<Map<String, Object>> zoomOut(@RequestParam(defaultValue = "100") int zoomLevel) {
-        int newZoom = Math.max(zoomLevel - 10, 100);
-        log.info("Zooming out → {}%", newZoom);
-        return getZoomedSchedules(newZoom, 0, 10);
+    public ResponseEntity<Integer> zoomOut(@RequestParam(defaultValue = "100") int zoomLevel) {
+        log.info("Zooming out to {}%", zoomLevel);
+
+        Map<String, Object> zoomMessage = new HashMap<>();
+        zoomMessage.put("type", "zoomUpdate");
+        zoomMessage.put("action", "out");
+        zoomMessage.put("level", zoomLevel);
+
+        messagingTemplate.convertAndSend("/topic/schedules", zoomMessage);
+        return ResponseEntity.ok(zoomLevel);
     }
 
     @GetMapping("/zoom/reset")
-    public ResponseEntity<Map<String, Object>> resetZoom() {
-        log.info("Resetting zoom to 100%");
-        return getZoomedSchedules(100, 0, 10);
+    public ResponseEntity<Integer> resetZoom() {
+        log.info("Resetting zoom to default {}%", DEFAULT_ZOOM);
+
+        Map<String, Object> zoomMessage = new HashMap<>();
+        zoomMessage.put("type", "zoomUpdate");
+        zoomMessage.put("action", "reset");
+        zoomMessage.put("level", DEFAULT_ZOOM);
+
+        messagingTemplate.convertAndSend("/topic/schedules", zoomMessage);
+        return ResponseEntity.ok(DEFAULT_ZOOM);
     }
+
 
 
 }

@@ -415,40 +415,48 @@ export class CreateScheduleComponent implements OnInit {
 
   zoomLevel: number[] = [50, 75, 80, 90, 100, 110, 125, 150, 175, 200];
   currentZoomIndex: number = 4; // index of 100%
-  zoomedIn() {
-    if (this.currentZoomIndex > 0) {
-      const newIndex = this.currentZoomIndex - 1;
-      const newZoom = this.zoomLevel[newIndex];
-      this.currentZoomIndex = newIndex;
 
+  zoomedIn() {
+    // Zoom In → move to next higher zoom level
+    if (this.currentZoomIndex < this.zoomLevel.length - 1) {
+      const newIndex = this.currentZoomIndex + 1;
+      const newZoom = this.zoomLevel[newIndex];
       this.scheduleService.zoomedIn(newZoom).subscribe({
-        next: (res) => console.log('Zoomed In →', newZoom, res),
+        next: (res) => {
+          this.currentZoomIndex = newIndex;
+          console.log('Zoomed In →', newZoom, res);
+        },
         error: (err) => console.error('Zoom In Error:', err)
       });
     }
   }
 
   zoomedOut() {
-    if (this.currentZoomIndex < this.zoomLevel.length - 1) {
-      const newIndex = this.currentZoomIndex + 1;
+    // Zoom Out → move to smaller zoom level
+    if (this.currentZoomIndex > 0) {
+      const newIndex = this.currentZoomIndex - 1;
       const newZoom = this.zoomLevel[newIndex];
-      this.currentZoomIndex = newIndex;
-
       this.scheduleService.zoomedOut(newZoom).subscribe({
-        next: (res) => console.log('Zoomed Out →', newZoom, res),
+        next: (res) => {
+          this.currentZoomIndex = newIndex;
+          console.log('Zoomed Out →', newZoom, res);
+        },
         error: (err) => console.error('Zoom Out Error:', err)
       });
     }
   }
 
-
   reset() {
-    this.currentZoomIndex = 4; // back to 100%
+    // Reset to 100% zoom (index 4)
+    this.currentZoomIndex = 4;
     const resetZoom = this.zoomLevel[this.currentZoomIndex];
     this.scheduleService.resetZoom().subscribe({
-      next: (res) => console.log('Reset Zoom →', resetZoom, res),
+      next: (res) => {
+        console.log('Reset Zoom →', resetZoom, res);
+      },
       error: (err) => console.error('Reset Error:', err)
     });
   }
+
 
 }

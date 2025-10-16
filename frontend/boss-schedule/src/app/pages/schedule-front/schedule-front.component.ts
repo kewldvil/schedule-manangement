@@ -47,20 +47,31 @@ export class ScheduleFrontComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.updateTime();
-    const parsedDate = moment()
+    const parsedDate = moment();
     this.currentDate = "ថ្ងៃ" + parsedDate.format("dddd") +
       " ទី" + parsedDate.format("DD") +
       " ខែ" + parsedDate.format("MMMM") +
       " ឆ្នាំ" + parsedDate.format("YYYY");
-    // Update the time every second
     this.intervalId = setInterval(() => this.updateTime(), 1000);
     this.updatePendingToComplete();
-    // this.listAllSchedule();
-    this.webSocketService.getScheduleUpdates().subscribe((schedule) => {
-      console.log("Received schedule update:", schedule);
-      this.listAllSchedule();
-    });
 
+    this.webSocketService.getScheduleUpdates()
+      .subscribe((update: any) => {
+        console.log('Received update:', update.type);
+        if (update.type=== 'zoomUpdate') {
+          console.log('Zoom message:', update);
+          this.updateZoom(update.level);
+        } else {
+          this.listAllSchedule();
+        }
+      });
+
+  }
+
+  private updateZoom(level: number): void {
+    console.log("Applying zoom:", level);
+    (document.body.style as any).zoom = `${level}%`;
+    // document.body.style.transformOrigin = 'top left';
   }
 
   private updateTime(): void {

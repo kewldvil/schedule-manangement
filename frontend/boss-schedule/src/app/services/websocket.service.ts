@@ -1,8 +1,8 @@
-import {Injectable} from '@angular/core';
-import {Client, Message} from '@stomp/stompjs';
-import SockJS from 'sockjs-client'; // ✅ Import SockJS
-import {Subject} from 'rxjs';
-import {environment} from "../../environments/environment";
+import { Injectable } from '@angular/core';
+import { Client, Message } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import { Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -16,25 +16,21 @@ export class WebSocketService {
   }
 
   private connect() {
-    // Initialize the STOMP client without brokerURL
     this.stompClient = new Client({
-      reconnectDelay: 5000, // Reconnect after 5 seconds if disconnected
-      debug: (str) => console.log(str), // Log STOMP debug messages
-      webSocketFactory: () => new SockJS(environment.sockJsUrl), // Use SockJS for WebSocket fallback
+      reconnectDelay: 5000,
+      debug: (str) => console.log(str),
+      webSocketFactory: () => new SockJS(environment.sockJsUrl),
       onConnect: () => {
-        console.log("Connected to WebSocket");
+        console.log('✅ Connected to WebSocket');
 
-        // Subscribe to schedule updates
+        // Subscribe to all schedule-related messages
         this.stompClient.subscribe('/topic/schedules', (message: Message) => {
           const body = message.body;
 
           try {
-            const data = JSON.parse(body); // Try parsing JSON
-            console.log('New schedule received:', data);
-            this.handleScheduleCreate(data);
-          } catch (error) {
-            // If parsing fails, treat it as plain text
-            console.log('Received plain text message:', body);
+            const data = JSON.parse(body);
+            this.handleJsonMessage(data);
+          } catch {
             this.handlePlainTextMessage(body);
           }
         });
@@ -46,57 +42,73 @@ export class WebSocketService {
         console.error('WebSocket error:', event);
       },
       onDisconnect: () => {
-        console.log('WebSocket disconnected');
+        console.log('⚠️ WebSocket disconnected');
       }
     });
 
-    // Activate the STOMP client
     this.stompClient.activate();
   }
 
-  // Handle newly created schedules (JSON)
-  private handleScheduleCreate(schedule: any) {
-    this.scheduleUpdates.next({type: 'create', data: schedule});
+  // ✅ Handle structured JSON messages from backend
+  private handleJsonMessage(data: any) {
+    switch (data.type) {
+      case 'zoomUpdate':
+        console.log('📡 Received Zoom Update:', data);
+        this.scheduleUpdates.next({
+          type: 'zoomUpdate',
+          action: data.action,
+          level: data.level
+        });
+        break;
+
+      case 'create':
+      case 'update':
+      case 'delete':
+        console.log('📦 Schedule event received:', data);
+        this.scheduleUpdates.next(data);
+        break;
+
+      default:
+        console.log('ℹ️ Unknown JSON message type:', data);
+        break;
+    }
   }
 
-  // Handle plain text messages (update or delete)
+  // 🧩 Fallback for plain text messages (legacy support)
   private handlePlainTextMessage(message: string) {
-    const items = ['schedule', 'presidium', 'location', 'uniform'];
-    let match = message.match(new RegExp(`Updated (${items.join('|')}) with ID: (\\d+)`));
+    console.log('📝 Plain text WebSocket message:', message);
 
-    if (match) {
-      const item = match[1]; // Get the matched item
-      const id = parseInt(match[2], 10);
-      console.log(`${item} with ID ${id} was updated`);
-      this.handleScheduleUpdate(id);
+    // Handle zoom message (e.g., "updated zoom to level: 150")
+    const zoomMatch = message.match(/updated zoom to level:\s*(\d+)/i);
+    if (zoomMatch) {
+      const level = parseInt(zoomMatch[1], 10);
+      console.log(`📏 Parsed zoom level: ${level}`);
+      this.scheduleUpdates.next({ type: 'zoomUpdate', level });
       return;
     }
 
-
-    match = message.match(/Deleted schedule with ID: (\d+)/);
-    if (match) {
-      const id = parseInt(match[1], 10);
-      console.log(`Schedule with ID ${id} was deleted`);
-      this.handleScheduleDelete(id);
+    // Handle deleted schedule
+    const deleteMatch = message.match(/Deleted schedule with ID:\s*(\d+)/i);
+    if (deleteMatch) {
+      const id = parseInt(deleteMatch[1], 10);
+      this.scheduleUpdates.next({ type: 'delete', id });
+      return;
     }
-    // Handle general update messages
-    if (message.startsWith("Schedules updated at")) {
-      console.log('Schedules were updated:', message);
-      this.scheduleUpdates.next({type: 'update', message});
+
+    // Handle general update
+    if (message.startsWith('Updated schedule with ID:')) {
+      const id = parseInt(message.split(':')[1], 10);
+      this.scheduleUpdates.next({ type: 'update', id });
+      return;
+    }
+
+    // Handle other broadcasts
+    if (message.startsWith('Schedules updated at')) {
+      this.scheduleUpdates.next({ type: 'update', message });
     }
   }
 
-  // Handle schedule updates
-  private handleScheduleUpdate(id: number) {
-    this.scheduleUpdates.next({type: 'update', id});
-  }
-
-  // Handle schedule deletions
-  private handleScheduleDelete(id: number) {
-    this.scheduleUpdates.next({type: 'delete', id});
-  }
-
-  // Expose schedule updates as an observable
+  // 🧠 Expose as Observable for Angular components
   getScheduleUpdates() {
     return this.scheduleUpdates.asObservable();
   }
